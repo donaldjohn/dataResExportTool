@@ -378,6 +378,7 @@ namespace TheDataResourceExporter
             this.menuShowImportHistory.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.BathHistoryMenu,
             this.SessionHistoryMenuItem});
+            this.menuShowImportHistory.Enabled = false;
             this.menuShowImportHistory.Name = "menuShowImportHistory";
             this.menuShowImportHistory.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.menuShowImportHistory.Size = new System.Drawing.Size(68, 21);
@@ -386,14 +387,14 @@ namespace TheDataResourceExporter
             // BathHistoryMenu
             // 
             this.BathHistoryMenu.Name = "BathHistoryMenu";
-            this.BathHistoryMenu.Size = new System.Drawing.Size(112, 22);
+            this.BathHistoryMenu.Size = new System.Drawing.Size(152, 22);
             this.BathHistoryMenu.Text = "按批次";
             this.BathHistoryMenu.Click += new System.EventHandler(this.BathHistoryMenu_Click);
             // 
             // SessionHistoryMenuItem
             // 
             this.SessionHistoryMenuItem.Name = "SessionHistoryMenuItem";
-            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(112, 22);
+            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(152, 22);
             this.SessionHistoryMenuItem.Text = "按文件";
             this.SessionHistoryMenuItem.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
@@ -410,13 +411,13 @@ namespace TheDataResourceExporter
             // 
             this.menuCheckHelp.Enabled = false;
             this.menuCheckHelp.Name = "menuCheckHelp";
-            this.menuCheckHelp.Size = new System.Drawing.Size(152, 22);
+            this.menuCheckHelp.Size = new System.Drawing.Size(124, 22);
             this.menuCheckHelp.Text = "查看帮助";
             // 
             // menuAbout
             // 
             this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(152, 22);
+            this.menuAbout.Size = new System.Drawing.Size(124, 22);
             this.menuAbout.Text = "关于";
             this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
             // 

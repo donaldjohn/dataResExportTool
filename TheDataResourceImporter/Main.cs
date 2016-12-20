@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using TheDataResourceExporter.Utils;
-
+using TheDataResourceImporter;
 
 namespace TheDataResourceExporter
 {
@@ -21,10 +21,9 @@ namespace TheDataResourceExporter
 
                 DataSourceEntities entitiesDataSource = new DataSourceEntities();
                 //绑定数据类型 下拉列表
-                var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)).ToList()
+                var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.HASEXPORTER)).ToList()
                                          orderby dataType.ID ascending
-                                         select new { diplayName = dataType.ID + "-" + dataType.CHINESE_NAME + ("Y".Equals(dataType.IN_PROCESS) ? "--建设中,勿选!!!" : ""), selectedValue = dataType.CHINESE_NAME };
-
+                                         select new { diplayName = dataType.ID + "-" + dataType.CHINESE_NAME, selectedValue = dataType.CHINESE_NAME };
                 cbFileType.DisplayMember = "diplayName";
                 cbFileType.ValueMember = "selectedValue";
 
@@ -59,7 +58,7 @@ namespace TheDataResourceExporter
             if (showFileDialog) //展示文件选择器
             {
                 OpenFileDialog dialog = new OpenFileDialog();
-                dialog.Filter = "任意文件(*.*)|*.*";
+                dialog.Filter = "任意文件(*.*)|*.txt";
                 dialog.Multiselect = false;
 
 
@@ -107,13 +106,6 @@ namespace TheDataResourceExporter
                 folderDialogEx.ShowNewFolderButton = false;
                 folderDialogEx.Description = "请选择文件路径";
                 folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
-                var dataRootDirStr = System.Configuration.ConfigurationManager.AppSettings["dataRootDir"];
-
-                //获取数据资源默认路径
-                if (Directory.Exists(dataRootDirStr))
-                {
-                    folderDialogEx.SelectedPath = dataRootDirStr;
-                }
 
                 if (folderDialogEx.ShowDialog() == DialogResult.OK)
                 {
@@ -133,15 +125,6 @@ namespace TheDataResourceExporter
         {
 
             //清空进度信息
-            //ImportManger.currentFile = "";
-            //ImportManger.totalCount = 0;
-            //ImportManger.handledCount = 0;
-            //ImportManger.handledXMLCount = 0;
-            //ImportManger.withExceptionButExtracted = 0;
-            //ImportManger.withExcepthonAndFiled2Exracted = 0;
-            //ImportManger.fileCount = 0;
-
-            //MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
             ExportManger.resetCounter();
 
             //清空强制终止标识
@@ -149,15 +132,12 @@ namespace TheDataResourceExporter
 
             MessageUtil.setTbDetail("");
 
-            //MessageUtil.DoAppendTBDetail("开始导入：");
-
             if (string.IsNullOrEmpty(tb_FilePath.Text) || null == filePaths || filePaths.Length == 0)
             {
                 MessageBox.Show("请选择至少选择一个文件！");
                 return;
             }
 
-            //var fileType = cbFileType.Text;
             var fileType = cbFileType.SelectedValue.ToString();
 
             //未选中文件类型
@@ -183,10 +163,6 @@ namespace TheDataResourceExporter
                         bool result = func.EndInvoke(ia);
                         if (result)
                         {
-                            //double totalSeconds = System.DateTime.Now.Subtract(ImportManger.importStartTime).TotalSeconds;
-
-                            //MessageUtil.DoAppendTBDetail(String.Format("\r\n导入结束!共运行了{0:0.##}秒, 成功入库{1}件，平均用时：{2:0.#######}", totalSeconds, ImportManger.handledCount, totalSeconds / ImportManger.handledCount));
-                            //MessageBox.Show("导入完成");
                         }
                     }
                     catch (Exception ex)
@@ -228,15 +204,13 @@ namespace TheDataResourceExporter
             }
             else
             {
-
-                //lock (importProgressBar)
                 {
                     labelcurrentArchive.Text = achievePath;
                     string status = handledCount + "/" + totalCount;
 
                     labelStatus.Text = status;
 
-                    string progressMsg = $"发现待入库{totalCount}件条目，已入库{handledCount}件，剩余{totalCount - handledCount}件";
+                    string progressMsg = $"发现需导出{totalCount}条记录，已导出{handledCount}条，剩余{totalCount - handledCount}天";
 
                     labelProgressMsg.Text = progressMsg;
 
@@ -330,7 +304,6 @@ namespace TheDataResourceExporter
 
         private void menuAbout_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show("技术支持 内网分机8323");
             new AboutBoxUS().ShowDialog();
         }
 
@@ -345,41 +318,6 @@ namespace TheDataResourceExporter
         {
             var fileType = cbFileType.SelectedValue;
 
-
-            //必须为文件夹模式 不可选文件模式
-
-            /*
-            if (
-                "中国商标".Equals(fileType)
-                ||
-                "中国商标许可数据".Equals(fileType)
-                ||
-                "中国商标转让数据".Equals(fileType)
-                ||
-                "马德里商标进入中国".Equals(fileType)
-                ||
-                "中国驰名商标数据".Equals(fileType)
-                ||
-                "美国申请商标".Equals(fileType)
-                ||
-                "美国转让商标".Equals(fileType)
-                ||
-                "美国审判商标".Equals(fileType)
-                                ||
-                "美国审判商标".Equals(fileType)
-              )
-            {
-                showFileDialog = false;
-                checkBoxIsDir.Checked = true;
-                checkBoxIsDir.Enabled = false;
-            }
-            else
-            {
-                //showFileDialog = true;
-                checkBoxIsDir.Checked = !showFileDialog;
-                checkBoxIsDir.Enabled = true;
-            }
-            */
             //清空文件路径
             filePaths = null;
             tb_FilePath.Text = "";

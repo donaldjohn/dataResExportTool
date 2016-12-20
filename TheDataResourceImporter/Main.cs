@@ -66,12 +66,12 @@ namespace TheDataResourceExporter
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePaths = null;
-                    tb_FilePath.Text = string.Empty;
+                    tbHDFilePath.Text = string.Empty;
 
 
                     filePaths = new string[] { dialog.FileName };
 
-                    tb_FilePath.Text = dialog.FileName;
+                    tbHDFilePath.Text = dialog.FileName;
                     //foreach (string filePath in filePaths)
                     //{
                     //    tb_FilePath.Text += (filePath + ";");
@@ -111,7 +111,7 @@ namespace TheDataResourceExporter
                 {
                     string foldPath = folderDialogEx.SelectedPath;
 
-                    tb_FilePath.Text = foldPath;
+                    tbHDFilePath.Text = foldPath;
 
                     filePaths = new string[] { foldPath };
                 }
@@ -132,7 +132,7 @@ namespace TheDataResourceExporter
 
             MessageUtil.setTbDetail("");
 
-            if (string.IsNullOrEmpty(tb_FilePath.Text) || null == filePaths || filePaths.Length == 0)
+            if (string.IsNullOrEmpty(tbHDFilePath.Text) || null == filePaths || filePaths.Length == 0)
             {
                 MessageBox.Show("请选择至少选择一个文件！");
                 return;
@@ -148,7 +148,7 @@ namespace TheDataResourceExporter
             }
 
 
-            SetEnabled(btn_Choose, false);
+            SetEnabled(btn_ChooseHD, false);
             SetEnabled(btnStart, false);
 
             Func<string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginImport;
@@ -170,7 +170,7 @@ namespace TheDataResourceExporter
                         MessageBox.Show(ex.Message);
                     }
 
-                    SetEnabled(btn_Choose, true);
+                    SetEnabled(btn_ChooseHD, true);
                     SetEnabled(btnStart, true);
                 }, null);
         }
@@ -320,7 +320,7 @@ namespace TheDataResourceExporter
 
             //清空文件路径
             filePaths = null;
-            tb_FilePath.Text = "";
+            tbHDFilePath.Text = "";
         }
 
         private void checkBoxIsDir_CheckedChanged(object sender, EventArgs e)
@@ -344,7 +344,7 @@ namespace TheDataResourceExporter
 
         private void tb_FilePath_TextChanged(object sender, EventArgs e)
         {
-            var inputedpath = tb_FilePath.Text;
+            var inputedpath = tbHDFilePath.Text;
             filePaths = new string[] { inputedpath };
         }
 

@@ -40,12 +40,10 @@ namespace TheDataResourceExporter
             this.cbFileType = new System.Windows.Forms.ComboBox();
             this.btnStart = new System.Windows.Forms.Button();
             this.btnAbort = new System.Windows.Forms.Button();
-            this.btn_Choose = new System.Windows.Forms.Button();
-            this.tb_FilePath = new System.Windows.Forms.TextBox();
-            this.labelProgressMsg = new System.Windows.Forms.Label();
+            this.btn_ChooseHD = new System.Windows.Forms.Button();
+            this.tbHDFilePath = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.labelStatus = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.labelcurrentArchive = new System.Windows.Forms.Label();
             this.buttonReset = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
@@ -62,21 +60,41 @@ namespace TheDataResourceExporter
             this.menuCheckHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxIsDir = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.btnChooseRetvedPath = new System.Windows.Forms.Button();
+            this.tbRetrievedFilePath = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.labelProgressMsg = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbAddr1 = new System.Windows.Forms.TextBox();
+            this.btnAddr1 = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.tbRecAddr = new System.Windows.Forms.TextBox();
+            this.btnRecAddr = new System.Windows.Forms.Button();
+            this.label9 = new System.Windows.Forms.Label();
+            this.tbAddr2 = new System.Windows.Forms.TextBox();
+            this.btnAddr2 = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbAddr1 = new System.Windows.Forms.CheckBox();
+            this.cbRecAddr = new System.Windows.Forms.CheckBox();
+            this.cbAddr2 = new System.Windows.Forms.CheckBox();
             this.mainMenu.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // importProgressBar
             // 
-            this.importProgressBar.Location = new System.Drawing.Point(114, 564);
+            this.importProgressBar.Location = new System.Drawing.Point(124, 610);
             this.importProgressBar.Name = "importProgressBar";
-            this.importProgressBar.Size = new System.Drawing.Size(614, 19);
+            this.importProgressBar.Size = new System.Drawing.Size(474, 19);
             this.importProgressBar.Step = 1;
             this.importProgressBar.TabIndex = 0;
             // 
             // progressLabel
             // 
             this.progressLabel.AutoSize = true;
-            this.progressLabel.Location = new System.Drawing.Point(47, 571);
+            this.progressLabel.Location = new System.Drawing.Point(57, 617);
             this.progressLabel.Name = "progressLabel";
             this.progressLabel.Size = new System.Drawing.Size(41, 12);
             this.progressLabel.TabIndex = 1;
@@ -84,17 +102,17 @@ namespace TheDataResourceExporter
             // 
             // textBoxDetail
             // 
-            this.textBoxDetail.Location = new System.Drawing.Point(124, 185);
+            this.textBoxDetail.Location = new System.Drawing.Point(113, 424);
             this.textBoxDetail.Multiline = true;
             this.textBoxDetail.Name = "textBoxDetail";
             this.textBoxDetail.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxDetail.Size = new System.Drawing.Size(604, 306);
+            this.textBoxDetail.Size = new System.Drawing.Size(474, 137);
             this.textBoxDetail.TabIndex = 2;
             // 
             // statusLabel
             // 
             this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new System.Drawing.Point(57, 197);
+            this.statusLabel.Location = new System.Drawing.Point(66, 424);
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(41, 12);
             this.statusLabel.TabIndex = 3;
@@ -103,16 +121,16 @@ namespace TheDataResourceExporter
             // fileDialogLabel
             // 
             this.fileDialogLabel.AutoSize = true;
-            this.fileDialogLabel.Location = new System.Drawing.Point(23, 102);
+            this.fileDialogLabel.Location = new System.Drawing.Point(23, 275);
             this.fileDialogLabel.Name = "fileDialogLabel";
-            this.fileDialogLabel.Size = new System.Drawing.Size(89, 12);
+            this.fileDialogLabel.Size = new System.Drawing.Size(53, 36);
             this.fileDialogLabel.TabIndex = 4;
-            this.fileDialogLabel.Text = "号单文件路径：";
+            this.fileDialogLabel.Text = "号单文\r\n\r\n件路径：";
             // 
             // fileTypeLabel
             // 
             this.fileTypeLabel.AutoSize = true;
-            this.fileTypeLabel.Location = new System.Drawing.Point(23, 39);
+            this.fileTypeLabel.Location = new System.Drawing.Point(35, 39);
             this.fileTypeLabel.Name = "fileTypeLabel";
             this.fileTypeLabel.Size = new System.Drawing.Size(65, 12);
             this.fileTypeLabel.TabIndex = 5;
@@ -215,13 +233,13 @@ namespace TheDataResourceExporter
             "中国中药专利深加工数据"});
             this.cbFileType.Location = new System.Drawing.Point(124, 31);
             this.cbFileType.Name = "cbFileType";
-            this.cbFileType.Size = new System.Drawing.Size(446, 20);
+            this.cbFileType.Size = new System.Drawing.Size(479, 20);
             this.cbFileType.TabIndex = 6;
             this.cbFileType.SelectedIndexChanged += new System.EventHandler(this.cbFileType_SelectedIndexChanged);
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(124, 147);
+            this.btnStart.Location = new System.Drawing.Point(109, 377);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
             this.btnStart.TabIndex = 7;
@@ -231,7 +249,7 @@ namespace TheDataResourceExporter
             // 
             // btnAbort
             // 
-            this.btnAbort.Location = new System.Drawing.Point(244, 147);
+            this.btnAbort.Location = new System.Drawing.Point(219, 377);
             this.btnAbort.Name = "btnAbort";
             this.btnAbort.Size = new System.Drawing.Size(75, 23);
             this.btnAbort.TabIndex = 8;
@@ -239,38 +257,29 @@ namespace TheDataResourceExporter
             this.btnAbort.UseVisualStyleBackColor = true;
             this.btnAbort.Click += new System.EventHandler(this.btnAbort_Click);
             // 
-            // btn_Choose
+            // btn_ChooseHD
             // 
-            this.btn_Choose.Location = new System.Drawing.Point(523, 91);
-            this.btn_Choose.Name = "btn_Choose";
-            this.btn_Choose.Size = new System.Drawing.Size(75, 23);
-            this.btn_Choose.TabIndex = 10;
-            this.btn_Choose.Text = "选择";
-            this.btn_Choose.UseVisualStyleBackColor = true;
-            this.btn_Choose.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btn_ChooseHD.Location = new System.Drawing.Point(516, 275);
+            this.btn_ChooseHD.Name = "btn_ChooseHD";
+            this.btn_ChooseHD.Size = new System.Drawing.Size(75, 23);
+            this.btn_ChooseHD.TabIndex = 10;
+            this.btn_ChooseHD.Text = "选择";
+            this.btn_ChooseHD.UseVisualStyleBackColor = true;
+            this.btn_ChooseHD.Click += new System.EventHandler(this.btn_Choose_Click);
             // 
-            // tb_FilePath
+            // tbHDFilePath
             // 
-            this.tb_FilePath.BackColor = System.Drawing.SystemColors.Window;
-            this.tb_FilePath.Location = new System.Drawing.Point(124, 92);
-            this.tb_FilePath.Name = "tb_FilePath";
-            this.tb_FilePath.Size = new System.Drawing.Size(393, 21);
-            this.tb_FilePath.TabIndex = 9;
-            this.tb_FilePath.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
-            // 
-            // labelProgressMsg
-            // 
-            this.labelProgressMsg.AutoSize = true;
-            this.labelProgressMsg.Location = new System.Drawing.Point(48, 615);
-            this.labelProgressMsg.Name = "labelProgressMsg";
-            this.labelProgressMsg.Size = new System.Drawing.Size(89, 12);
-            this.labelProgressMsg.TabIndex = 11;
-            this.labelProgressMsg.Text = "              ";
+            this.tbHDFilePath.BackColor = System.Drawing.SystemColors.Window;
+            this.tbHDFilePath.Location = new System.Drawing.Point(117, 276);
+            this.tbHDFilePath.Name = "tbHDFilePath";
+            this.tbHDFilePath.Size = new System.Drawing.Size(393, 21);
+            this.tbHDFilePath.TabIndex = 9;
+            this.tbHDFilePath.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(401, 615);
+            this.label8.Location = new System.Drawing.Point(411, 661);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(0, 12);
             this.label8.TabIndex = 18;
@@ -278,32 +287,23 @@ namespace TheDataResourceExporter
             // labelStatus
             // 
             this.labelStatus.AutoSize = true;
-            this.labelStatus.Location = new System.Drawing.Point(734, 571);
+            this.labelStatus.Location = new System.Drawing.Point(624, 617);
             this.labelStatus.Name = "labelStatus";
             this.labelStatus.Size = new System.Drawing.Size(23, 12);
             this.labelStatus.TabIndex = 22;
             this.labelStatus.Text = "0/0";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 520);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
-            this.label2.TabIndex = 23;
-            this.label2.Text = "当前压缩包：";
-            // 
             // labelcurrentArchive
             // 
             this.labelcurrentArchive.AutoSize = true;
-            this.labelcurrentArchive.Location = new System.Drawing.Point(114, 520);
+            this.labelcurrentArchive.Location = new System.Drawing.Point(124, 581);
             this.labelcurrentArchive.Name = "labelcurrentArchive";
             this.labelcurrentArchive.Size = new System.Drawing.Size(0, 12);
             this.labelcurrentArchive.TabIndex = 24;
             // 
             // buttonReset
             // 
-            this.buttonReset.Location = new System.Drawing.Point(367, 147);
+            this.buttonReset.Location = new System.Drawing.Point(342, 377);
             this.buttonReset.Name = "buttonReset";
             this.buttonReset.Size = new System.Drawing.Size(75, 23);
             this.buttonReset.TabIndex = 25;
@@ -314,7 +314,7 @@ namespace TheDataResourceExporter
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(48, 658);
+            this.label4.Location = new System.Drawing.Point(58, 649);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(41, 12);
             this.label4.TabIndex = 26;
@@ -323,7 +323,7 @@ namespace TheDataResourceExporter
             // labelelapsedTotalTime
             // 
             this.labelelapsedTotalTime.AutoSize = true;
-            this.labelelapsedTotalTime.Location = new System.Drawing.Point(95, 658);
+            this.labelelapsedTotalTime.Location = new System.Drawing.Point(105, 649);
             this.labelelapsedTotalTime.Name = "labelelapsedTotalTime";
             this.labelelapsedTotalTime.Size = new System.Drawing.Size(0, 12);
             this.labelelapsedTotalTime.TabIndex = 27;
@@ -331,7 +331,7 @@ namespace TheDataResourceExporter
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(242, 657);
+            this.label7.Location = new System.Drawing.Point(252, 648);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 12);
             this.label7.TabIndex = 28;
@@ -340,7 +340,7 @@ namespace TheDataResourceExporter
             // labelAverageElapsedTime
             // 
             this.labelAverageElapsedTime.AutoSize = true;
-            this.labelAverageElapsedTime.Location = new System.Drawing.Point(317, 657);
+            this.labelAverageElapsedTime.Location = new System.Drawing.Point(327, 648);
             this.labelAverageElapsedTime.Name = "labelAverageElapsedTime";
             this.labelAverageElapsedTime.Size = new System.Drawing.Size(0, 12);
             this.labelAverageElapsedTime.TabIndex = 29;
@@ -348,16 +348,16 @@ namespace TheDataResourceExporter
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(382, 657);
+            this.label5.Location = new System.Drawing.Point(392, 648);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(119, 12);
             this.label5.TabIndex = 30;
-            this.label5.Text = "入库速度（件/秒）：";
+            this.label5.Text = "提取速度（件/秒）：";
             // 
             // labelImportCountPerSec
             // 
             this.labelImportCountPerSec.AutoSize = true;
-            this.labelImportCountPerSec.Location = new System.Drawing.Point(507, 658);
+            this.labelImportCountPerSec.Location = new System.Drawing.Point(517, 649);
             this.labelImportCountPerSec.Name = "labelImportCountPerSec";
             this.labelImportCountPerSec.Size = new System.Drawing.Size(0, 12);
             this.labelImportCountPerSec.TabIndex = 31;
@@ -369,7 +369,7 @@ namespace TheDataResourceExporter
             this.menuHelp});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
-            this.mainMenu.Size = new System.Drawing.Size(789, 25);
+            this.mainMenu.Size = new System.Drawing.Size(734, 25);
             this.mainMenu.TabIndex = 32;
             this.mainMenu.Text = "menuStrip1";
             // 
@@ -382,7 +382,7 @@ namespace TheDataResourceExporter
             this.menuShowImportHistory.Name = "menuShowImportHistory";
             this.menuShowImportHistory.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.menuShowImportHistory.Size = new System.Drawing.Size(68, 21);
-            this.menuShowImportHistory.Text = "导入历史";
+            this.menuShowImportHistory.Text = "导出历史";
             // 
             // BathHistoryMenu
             // 
@@ -424,7 +424,7 @@ namespace TheDataResourceExporter
             // checkBoxIsDir
             // 
             this.checkBoxIsDir.AutoSize = true;
-            this.checkBoxIsDir.Location = new System.Drawing.Point(622, 95);
+            this.checkBoxIsDir.Location = new System.Drawing.Point(615, 279);
             this.checkBoxIsDir.Name = "checkBoxIsDir";
             this.checkBoxIsDir.Size = new System.Drawing.Size(84, 16);
             this.checkBoxIsDir.TabIndex = 34;
@@ -432,36 +432,229 @@ namespace TheDataResourceExporter
             this.checkBoxIsDir.UseVisualStyleBackColor = true;
             this.checkBoxIsDir.CheckedChanged += new System.EventHandler(this.checkBoxIsDir_CheckedChanged);
             // 
+            // button1
+            // 
+            this.button1.Enabled = false;
+            this.button1.Location = new System.Drawing.Point(622, 89);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 37;
+            this.button1.Text = "从编目获取";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // btnChooseRetvedPath
+            // 
+            this.btnChooseRetvedPath.Location = new System.Drawing.Point(516, 329);
+            this.btnChooseRetvedPath.Name = "btnChooseRetvedPath";
+            this.btnChooseRetvedPath.Size = new System.Drawing.Size(75, 23);
+            this.btnChooseRetvedPath.TabIndex = 40;
+            this.btnChooseRetvedPath.Text = "选择";
+            this.btnChooseRetvedPath.UseVisualStyleBackColor = true;
+            // 
+            // tbRetrievedFilePath
+            // 
+            this.tbRetrievedFilePath.BackColor = System.Drawing.SystemColors.Window;
+            this.tbRetrievedFilePath.Location = new System.Drawing.Point(117, 330);
+            this.tbRetrievedFilePath.Name = "tbRetrievedFilePath";
+            this.tbRetrievedFilePath.Size = new System.Drawing.Size(393, 21);
+            this.tbRetrievedFilePath.TabIndex = 39;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(23, 329);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(65, 36);
+            this.label3.TabIndex = 38;
+            this.label3.Text = "提取文件\r\n\r\n保存位置：";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(22, 581);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(65, 12);
+            this.label2.TabIndex = 23;
+            this.label2.Text = "当前号单：";
+            // 
+            // labelProgressMsg
+            // 
+            this.labelProgressMsg.AutoSize = true;
+            this.labelProgressMsg.Location = new System.Drawing.Point(57, 672);
+            this.labelProgressMsg.Name = "labelProgressMsg";
+            this.labelProgressMsg.Size = new System.Drawing.Size(89, 12);
+            this.labelProgressMsg.TabIndex = 11;
+            this.labelProgressMsg.Text = "              ";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(41, 25);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(47, 36);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "本 地\r\n\r\n备份1：";
+            // 
+            // tbAddr1
+            // 
+            this.tbAddr1.BackColor = System.Drawing.SystemColors.Window;
+            this.tbAddr1.Location = new System.Drawing.Point(128, 95);
+            this.tbAddr1.Name = "tbAddr1";
+            this.tbAddr1.Size = new System.Drawing.Size(393, 21);
+            this.tbAddr1.TabIndex = 9;
+            this.tbAddr1.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            // 
+            // btnAddr1
+            // 
+            this.btnAddr1.Location = new System.Drawing.Point(527, 94);
+            this.btnAddr1.Name = "btnAddr1";
+            this.btnAddr1.Size = new System.Drawing.Size(75, 23);
+            this.btnAddr1.TabIndex = 10;
+            this.btnAddr1.Text = "选择";
+            this.btnAddr1.UseVisualStyleBackColor = true;
+            this.btnAddr1.Click += new System.EventHandler(this.btn_Choose_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(41, 83);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(41, 36);
+            this.label6.TabIndex = 4;
+            this.label6.Text = "灾备\r\n\r\n备份：";
+            // 
+            // tbRecAddr
+            // 
+            this.tbRecAddr.BackColor = System.Drawing.SystemColors.Window;
+            this.tbRecAddr.Location = new System.Drawing.Point(129, 152);
+            this.tbRecAddr.Name = "tbRecAddr";
+            this.tbRecAddr.Size = new System.Drawing.Size(393, 21);
+            this.tbRecAddr.TabIndex = 9;
+            this.tbRecAddr.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            // 
+            // btnRecAddr
+            // 
+            this.btnRecAddr.Location = new System.Drawing.Point(528, 151);
+            this.btnRecAddr.Name = "btnRecAddr";
+            this.btnRecAddr.Size = new System.Drawing.Size(75, 23);
+            this.btnRecAddr.TabIndex = 10;
+            this.btnRecAddr.Text = "选择";
+            this.btnRecAddr.UseVisualStyleBackColor = true;
+            this.btnRecAddr.Click += new System.EventHandler(this.btn_Choose_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(41, 139);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(47, 36);
+            this.label9.TabIndex = 4;
+            this.label9.Text = "本 地\r\n\r\n备份2：";
+            // 
+            // tbAddr2
+            // 
+            this.tbAddr2.BackColor = System.Drawing.SystemColors.Window;
+            this.tbAddr2.Location = new System.Drawing.Point(129, 210);
+            this.tbAddr2.Name = "tbAddr2";
+            this.tbAddr2.Size = new System.Drawing.Size(393, 21);
+            this.tbAddr2.TabIndex = 9;
+            this.tbAddr2.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            // 
+            // btnAddr2
+            // 
+            this.btnAddr2.Location = new System.Drawing.Point(528, 208);
+            this.btnAddr2.Name = "btnAddr2";
+            this.btnAddr2.Size = new System.Drawing.Size(75, 23);
+            this.btnAddr2.TabIndex = 10;
+            this.btnAddr2.Text = "选择";
+            this.btnAddr2.UseVisualStyleBackColor = true;
+            this.btnAddr2.Click += new System.EventHandler(this.btn_Choose_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.cbAddr2);
+            this.groupBox1.Controls.Add(this.cbRecAddr);
+            this.groupBox1.Controls.Add(this.cbAddr1);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Controls.Add(this.label9);
+            this.groupBox1.Location = new System.Drawing.Point(25, 69);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(591, 188);
+            this.groupBox1.TabIndex = 41;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "提取数据位置";
+            // 
+            // cbAddr1
+            // 
+            this.cbAddr1.AutoSize = true;
+            this.cbAddr1.Checked = true;
+            this.cbAddr1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbAddr1.Location = new System.Drawing.Point(7, 31);
+            this.cbAddr1.Name = "cbAddr1";
+            this.cbAddr1.Size = new System.Drawing.Size(15, 14);
+            this.cbAddr1.TabIndex = 5;
+            this.cbAddr1.UseVisualStyleBackColor = true;
+            // 
+            // cbRecAddr
+            // 
+            this.cbRecAddr.AutoSize = true;
+            this.cbRecAddr.Location = new System.Drawing.Point(6, 90);
+            this.cbRecAddr.Name = "cbRecAddr";
+            this.cbRecAddr.Size = new System.Drawing.Size(15, 14);
+            this.cbRecAddr.TabIndex = 5;
+            this.cbRecAddr.UseVisualStyleBackColor = true;
+            // 
+            // cbAddr2
+            // 
+            this.cbAddr2.AutoSize = true;
+            this.cbAddr2.Location = new System.Drawing.Point(6, 148);
+            this.cbAddr2.Name = "cbAddr2";
+            this.cbAddr2.Size = new System.Drawing.Size(15, 14);
+            this.cbAddr2.TabIndex = 5;
+            this.cbAddr2.UseVisualStyleBackColor = true;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(789, 768);
+            this.ClientSize = new System.Drawing.Size(734, 768);
+            this.Controls.Add(this.btnChooseRetvedPath);
+            this.Controls.Add(this.tbRetrievedFilePath);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.checkBoxIsDir);
+            this.Controls.Add(this.buttonReset);
+            this.Controls.Add(this.btn_ChooseHD);
+            this.Controls.Add(this.tbHDFilePath);
+            this.Controls.Add(this.btnAbort);
+            this.Controls.Add(this.btnStart);
+            this.Controls.Add(this.fileDialogLabel);
+            this.Controls.Add(this.statusLabel);
+            this.Controls.Add(this.textBoxDetail);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.labelImportCountPerSec);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.labelAverageElapsedTime);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.labelelapsedTotalTime);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.buttonReset);
             this.Controls.Add(this.labelcurrentArchive);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.labelProgressMsg);
-            this.Controls.Add(this.btn_Choose);
-            this.Controls.Add(this.tb_FilePath);
-            this.Controls.Add(this.btnAbort);
-            this.Controls.Add(this.btnStart);
+            this.Controls.Add(this.btnAddr2);
+            this.Controls.Add(this.btnRecAddr);
+            this.Controls.Add(this.btnAddr1);
+            this.Controls.Add(this.tbAddr2);
+            this.Controls.Add(this.tbRecAddr);
+            this.Controls.Add(this.tbAddr1);
             this.Controls.Add(this.cbFileType);
             this.Controls.Add(this.fileTypeLabel);
-            this.Controls.Add(this.fileDialogLabel);
-            this.Controls.Add(this.statusLabel);
-            this.Controls.Add(this.textBoxDetail);
             this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.importProgressBar);
             this.Controls.Add(this.mainMenu);
+            this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenu;
             this.Name = "Main";
@@ -470,6 +663,8 @@ namespace TheDataResourceExporter
             this.Load += new System.EventHandler(this.Main_Load);
             this.mainMenu.ResumeLayout(false);
             this.mainMenu.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -486,12 +681,10 @@ namespace TheDataResourceExporter
         private System.Windows.Forms.ComboBox cbFileType;
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.Button btnAbort;
-        private System.Windows.Forms.Button btn_Choose;
-        private System.Windows.Forms.TextBox tb_FilePath;
-        private System.Windows.Forms.Label labelProgressMsg;
+        private System.Windows.Forms.Button btn_ChooseHD;
+        private System.Windows.Forms.TextBox tbHDFilePath;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label labelStatus;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label labelcurrentArchive;
         private System.Windows.Forms.Button buttonReset;
         private System.Windows.Forms.Label label4;
@@ -508,6 +701,25 @@ namespace TheDataResourceExporter
         private ToolStripMenuItem menuShowImportHistory;
         private ToolStripMenuItem BathHistoryMenu;
         private ToolStripMenuItem SessionHistoryMenuItem;
+        private Button button1;
+        private Button btnChooseRetvedPath;
+        private TextBox tbRetrievedFilePath;
+        private Label label3;
+        private Label label2;
+        private Label labelProgressMsg;
+        private Label label1;
+        private TextBox tbAddr1;
+        private Button btnAddr1;
+        private Label label6;
+        private TextBox tbRecAddr;
+        private Button btnRecAddr;
+        private Label label9;
+        private TextBox tbAddr2;
+        private Button btnAddr2;
+        private GroupBox groupBox1;
+        private CheckBox cbAddr1;
+        private CheckBox cbAddr2;
+        private CheckBox cbRecAddr;
     }
 }
 

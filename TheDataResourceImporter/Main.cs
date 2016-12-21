@@ -54,11 +54,11 @@ namespace TheDataResourceExporter
             }
         }
 
-        private void getAndSetDataStoragePath(DataSourceEntities entitiesDataSource, string dataResName)
+        private void getAndSetDataStoragePath(DataSourceEntities entitiesDataSource, string dataNum)
         {
             string addr1 = "", addr2 = "", recAddr = "";
 
-            var queriedBianMuEnumerator = entitiesDataSource.W_SJZYZTSXXX.Where(rec => (!string.IsNullOrEmpty(dataResName) && dataResName.Equals(rec.F_DATANAME)));
+            var queriedBianMuEnumerator = entitiesDataSource.W_SJZYZTSXXX.Where(rec => (!string.IsNullOrEmpty(dataNum) && dataNum.Equals(rec.F_DATANAME)));
 
             var targetBianMu = queriedBianMuEnumerator.FirstOrDefault();
             if (null == targetBianMu)
@@ -101,46 +101,18 @@ namespace TheDataResourceExporter
                 dialog.Filter = "任意文件(*.*)|*.txt";
                 dialog.Multiselect = false;
 
-
-
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePaths = null;
                     tbHDFilePath.Text = string.Empty;
 
-
                     filePaths = new string[] { dialog.FileName };
 
                     tbHDFilePath.Text = dialog.FileName;
-                    //foreach (string filePath in filePaths)
-                    //{
-                    //    tb_FilePath.Text += (filePath + ";");
-                    //}
                 }
             }
             else //文件夹模式
             {
-                //FolderBrowserDialog dialog = new FolderBrowserDialog();
-                //dialog.ShowNewFolderButton = false;
-                //dialog.Description = "请选择文件路径";
-                //dialog.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
-                //var dataRootDirStr = System.Configuration.ConfigurationManager.AppSettings["dataRootDir"];
-
-                ////获取数据资源默认路径
-                //if (Directory.Exists(dataRootDirStr))
-                //{
-                //    dialog.SelectedPath = dataRootDirStr;
-                //}
-
-                //if (dialog.ShowDialog() == DialogResult.OK)
-                //{
-                //    string foldPath = dialog.SelectedPath;
-
-                //    tb_FilePath.Text = foldPath;
-
-                //    filePaths = new string[] { foldPath };
-                //}
-
                 FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
 
                 folderDialogEx.ShowNewFolderButton = false;
@@ -362,16 +334,37 @@ namespace TheDataResourceExporter
             }
 
 
-            var fileType = cbFileType.SelectedValue;
+            var fileType = cbFileType.SelectedValue.ToString();
 
-            var fileTypeInBianMu = fileType;//如果和编目的数据资源类型不同,需要转换
+            var fDataNum = "";
+            switch (fileType)
+            {
+                case "中国生物序列深加工数据-中文": fDataNum = "045"; break;
+                case "中国生物序列深加工数据-翻译": fDataNum = "045"; break;
+                case "中国商标": fDataNum = "600"; break;
+                case "马德里商标进入中国": fDataNum = "603"; break;
+                case "美国申请商标": fDataNum = "605"; break;
+                case "美国转让商标": fDataNum = "606"; break;
+                case "美国审判商标": fDataNum = "607"; break;
+                case "社内外知识产权图书题录数据": fDataNum = "608"; break;
+                case "中国法院判例初加工数据": fDataNum = "610"; break;
+                case "马德里商标购买数据": fDataNum = "613"; break;
+                case "中国专利代理知识产权法律法规加工数据": fDataNum = "614"; break;
+                case "中国集成电路布图公告及事务数据": fDataNum = "615"; break;
+                case "中国知识产权海关备案数据": fDataNum = "616"; break;
+                case "中国专利复审（无效）数据": fDataNum = "046"; break;
+                case "中国专利的判决书数据": fDataNum = "506"; break;
+                case "中国中药专利翻译数据": fDataNum = "052"; break;
+            }
 
 
 
+
+            var fDataNum = fileType;//如果和编目的数据资源类型不同,需要转换
 
             using (DataSourceEntities dataSourceEntities = new DataSourceEntities())
             {
-                getAndSetDataStoragePath(dataSourceEntities, fileTypeInBianMu.ToString());
+                getAndSetDataStoragePath(dataSourceEntities, fDataNum.ToString());
             }
 
             //清空文件路径

@@ -60,25 +60,25 @@ namespace TheDataResourceExporter
             this.menuCheckHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxIsDir = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.btnChooseRetvedPath = new System.Windows.Forms.Button();
-            this.tbRetrievedFilePath = new System.Windows.Forms.TextBox();
+            this.btnGetDataStoragePath = new System.Windows.Forms.Button();
+            this.btnCSRetvedFileSavePath = new System.Windows.Forms.Button();
+            this.tbRetrievedFileSavePath = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.labelProgressMsg = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tbAddr1 = new System.Windows.Forms.TextBox();
-            this.btnAddr1 = new System.Windows.Forms.Button();
+            this.btnCSAddr1 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.tbRecAddr = new System.Windows.Forms.TextBox();
-            this.btnRecAddr = new System.Windows.Forms.Button();
+            this.btnCSRecAddr = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.tbAddr2 = new System.Windows.Forms.TextBox();
-            this.btnAddr2 = new System.Windows.Forms.Button();
+            this.btnCSAddr2 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.cbAddr1 = new System.Windows.Forms.CheckBox();
-            this.cbRecAddr = new System.Windows.Forms.CheckBox();
             this.cbAddr2 = new System.Windows.Forms.CheckBox();
+            this.cbRecAddr = new System.Windows.Forms.CheckBox();
+            this.cbAddr1 = new System.Windows.Forms.CheckBox();
             this.mainMenu.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -387,14 +387,14 @@ namespace TheDataResourceExporter
             // BathHistoryMenu
             // 
             this.BathHistoryMenu.Name = "BathHistoryMenu";
-            this.BathHistoryMenu.Size = new System.Drawing.Size(152, 22);
+            this.BathHistoryMenu.Size = new System.Drawing.Size(112, 22);
             this.BathHistoryMenu.Text = "按批次";
             this.BathHistoryMenu.Click += new System.EventHandler(this.BathHistoryMenu_Click);
             // 
             // SessionHistoryMenuItem
             // 
             this.SessionHistoryMenuItem.Name = "SessionHistoryMenuItem";
-            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(112, 22);
             this.SessionHistoryMenuItem.Text = "按文件";
             this.SessionHistoryMenuItem.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
@@ -432,32 +432,32 @@ namespace TheDataResourceExporter
             this.checkBoxIsDir.UseVisualStyleBackColor = true;
             this.checkBoxIsDir.CheckedChanged += new System.EventHandler(this.checkBoxIsDir_CheckedChanged);
             // 
-            // button1
+            // btnGetDataStoragePath
             // 
-            this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(622, 89);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 37;
-            this.button1.Text = "从编目获取";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnGetDataStoragePath.Location = new System.Drawing.Point(622, 89);
+            this.btnGetDataStoragePath.Name = "btnGetDataStoragePath";
+            this.btnGetDataStoragePath.Size = new System.Drawing.Size(75, 23);
+            this.btnGetDataStoragePath.TabIndex = 37;
+            this.btnGetDataStoragePath.Text = "从编目获取";
+            this.btnGetDataStoragePath.UseVisualStyleBackColor = true;
+            this.btnGetDataStoragePath.Click += new System.EventHandler(this.btnGetDataStoragePath_Click);
             // 
-            // btnChooseRetvedPath
+            // btnCSRetvedFileSavePath
             // 
-            this.btnChooseRetvedPath.Location = new System.Drawing.Point(516, 329);
-            this.btnChooseRetvedPath.Name = "btnChooseRetvedPath";
-            this.btnChooseRetvedPath.Size = new System.Drawing.Size(75, 23);
-            this.btnChooseRetvedPath.TabIndex = 40;
-            this.btnChooseRetvedPath.Text = "选择";
-            this.btnChooseRetvedPath.UseVisualStyleBackColor = true;
+            this.btnCSRetvedFileSavePath.Location = new System.Drawing.Point(516, 329);
+            this.btnCSRetvedFileSavePath.Name = "btnCSRetvedFileSavePath";
+            this.btnCSRetvedFileSavePath.Size = new System.Drawing.Size(75, 23);
+            this.btnCSRetvedFileSavePath.TabIndex = 40;
+            this.btnCSRetvedFileSavePath.Text = "选择";
+            this.btnCSRetvedFileSavePath.UseVisualStyleBackColor = true;
             // 
-            // tbRetrievedFilePath
+            // tbRetrievedFileSavePath
             // 
-            this.tbRetrievedFilePath.BackColor = System.Drawing.SystemColors.Window;
-            this.tbRetrievedFilePath.Location = new System.Drawing.Point(117, 330);
-            this.tbRetrievedFilePath.Name = "tbRetrievedFilePath";
-            this.tbRetrievedFilePath.Size = new System.Drawing.Size(393, 21);
-            this.tbRetrievedFilePath.TabIndex = 39;
+            this.tbRetrievedFileSavePath.BackColor = System.Drawing.SystemColors.Window;
+            this.tbRetrievedFileSavePath.Location = new System.Drawing.Point(117, 330);
+            this.tbRetrievedFileSavePath.Name = "tbRetrievedFileSavePath";
+            this.tbRetrievedFileSavePath.Size = new System.Drawing.Size(393, 21);
+            this.tbRetrievedFileSavePath.TabIndex = 39;
             // 
             // label3
             // 
@@ -504,15 +504,15 @@ namespace TheDataResourceExporter
             this.tbAddr1.TabIndex = 9;
             this.tbAddr1.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
             // 
-            // btnAddr1
+            // btnCSAddr1
             // 
-            this.btnAddr1.Location = new System.Drawing.Point(527, 94);
-            this.btnAddr1.Name = "btnAddr1";
-            this.btnAddr1.Size = new System.Drawing.Size(75, 23);
-            this.btnAddr1.TabIndex = 10;
-            this.btnAddr1.Text = "选择";
-            this.btnAddr1.UseVisualStyleBackColor = true;
-            this.btnAddr1.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSAddr1.Location = new System.Drawing.Point(527, 94);
+            this.btnCSAddr1.Name = "btnCSAddr1";
+            this.btnCSAddr1.Size = new System.Drawing.Size(75, 23);
+            this.btnCSAddr1.TabIndex = 10;
+            this.btnCSAddr1.Text = "选择";
+            this.btnCSAddr1.UseVisualStyleBackColor = true;
+            this.btnCSAddr1.Click += new System.EventHandler(this.btn_Choose_Click);
             // 
             // label6
             // 
@@ -532,15 +532,15 @@ namespace TheDataResourceExporter
             this.tbRecAddr.TabIndex = 9;
             this.tbRecAddr.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
             // 
-            // btnRecAddr
+            // btnCSRecAddr
             // 
-            this.btnRecAddr.Location = new System.Drawing.Point(528, 151);
-            this.btnRecAddr.Name = "btnRecAddr";
-            this.btnRecAddr.Size = new System.Drawing.Size(75, 23);
-            this.btnRecAddr.TabIndex = 10;
-            this.btnRecAddr.Text = "选择";
-            this.btnRecAddr.UseVisualStyleBackColor = true;
-            this.btnRecAddr.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSRecAddr.Location = new System.Drawing.Point(528, 151);
+            this.btnCSRecAddr.Name = "btnCSRecAddr";
+            this.btnCSRecAddr.Size = new System.Drawing.Size(75, 23);
+            this.btnCSRecAddr.TabIndex = 10;
+            this.btnCSRecAddr.Text = "选择";
+            this.btnCSRecAddr.UseVisualStyleBackColor = true;
+            this.btnCSRecAddr.Click += new System.EventHandler(this.btn_Choose_Click);
             // 
             // label9
             // 
@@ -560,15 +560,15 @@ namespace TheDataResourceExporter
             this.tbAddr2.TabIndex = 9;
             this.tbAddr2.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
             // 
-            // btnAddr2
+            // btnCSAddr2
             // 
-            this.btnAddr2.Location = new System.Drawing.Point(528, 208);
-            this.btnAddr2.Name = "btnAddr2";
-            this.btnAddr2.Size = new System.Drawing.Size(75, 23);
-            this.btnAddr2.TabIndex = 10;
-            this.btnAddr2.Text = "选择";
-            this.btnAddr2.UseVisualStyleBackColor = true;
-            this.btnAddr2.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSAddr2.Location = new System.Drawing.Point(528, 208);
+            this.btnCSAddr2.Name = "btnCSAddr2";
+            this.btnCSAddr2.Size = new System.Drawing.Size(75, 23);
+            this.btnCSAddr2.TabIndex = 10;
+            this.btnCSAddr2.Text = "选择";
+            this.btnCSAddr2.UseVisualStyleBackColor = true;
+            this.btnCSAddr2.Click += new System.EventHandler(this.btn_Choose_Click);
             // 
             // groupBox1
             // 
@@ -585,6 +585,24 @@ namespace TheDataResourceExporter
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "提取数据位置";
             // 
+            // cbAddr2
+            // 
+            this.cbAddr2.AutoSize = true;
+            this.cbAddr2.Location = new System.Drawing.Point(6, 148);
+            this.cbAddr2.Name = "cbAddr2";
+            this.cbAddr2.Size = new System.Drawing.Size(15, 14);
+            this.cbAddr2.TabIndex = 5;
+            this.cbAddr2.UseVisualStyleBackColor = true;
+            // 
+            // cbRecAddr
+            // 
+            this.cbRecAddr.AutoSize = true;
+            this.cbRecAddr.Location = new System.Drawing.Point(6, 90);
+            this.cbRecAddr.Name = "cbRecAddr";
+            this.cbRecAddr.Size = new System.Drawing.Size(15, 14);
+            this.cbRecAddr.TabIndex = 5;
+            this.cbRecAddr.UseVisualStyleBackColor = true;
+            // 
             // cbAddr1
             // 
             this.cbAddr1.AutoSize = true;
@@ -596,31 +614,13 @@ namespace TheDataResourceExporter
             this.cbAddr1.TabIndex = 5;
             this.cbAddr1.UseVisualStyleBackColor = true;
             // 
-            // cbRecAddr
-            // 
-            this.cbRecAddr.AutoSize = true;
-            this.cbRecAddr.Location = new System.Drawing.Point(6, 90);
-            this.cbRecAddr.Name = "cbRecAddr";
-            this.cbRecAddr.Size = new System.Drawing.Size(15, 14);
-            this.cbRecAddr.TabIndex = 5;
-            this.cbRecAddr.UseVisualStyleBackColor = true;
-            // 
-            // cbAddr2
-            // 
-            this.cbAddr2.AutoSize = true;
-            this.cbAddr2.Location = new System.Drawing.Point(6, 148);
-            this.cbAddr2.Name = "cbAddr2";
-            this.cbAddr2.Size = new System.Drawing.Size(15, 14);
-            this.cbAddr2.TabIndex = 5;
-            this.cbAddr2.UseVisualStyleBackColor = true;
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(734, 768);
-            this.Controls.Add(this.btnChooseRetvedPath);
-            this.Controls.Add(this.tbRetrievedFilePath);
+            this.Controls.Add(this.btnCSRetvedFileSavePath);
+            this.Controls.Add(this.tbRetrievedFileSavePath);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.checkBoxIsDir);
             this.Controls.Add(this.buttonReset);
@@ -631,7 +631,7 @@ namespace TheDataResourceExporter
             this.Controls.Add(this.fileDialogLabel);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.textBoxDetail);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnGetDataStoragePath);
             this.Controls.Add(this.labelImportCountPerSec);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.labelAverageElapsedTime);
@@ -643,9 +643,9 @@ namespace TheDataResourceExporter
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.labelProgressMsg);
-            this.Controls.Add(this.btnAddr2);
-            this.Controls.Add(this.btnRecAddr);
-            this.Controls.Add(this.btnAddr1);
+            this.Controls.Add(this.btnCSAddr2);
+            this.Controls.Add(this.btnCSRecAddr);
+            this.Controls.Add(this.btnCSAddr1);
             this.Controls.Add(this.tbAddr2);
             this.Controls.Add(this.tbRecAddr);
             this.Controls.Add(this.tbAddr1);
@@ -701,21 +701,21 @@ namespace TheDataResourceExporter
         private ToolStripMenuItem menuShowImportHistory;
         private ToolStripMenuItem BathHistoryMenu;
         private ToolStripMenuItem SessionHistoryMenuItem;
-        private Button button1;
-        private Button btnChooseRetvedPath;
-        private TextBox tbRetrievedFilePath;
+        private Button btnGetDataStoragePath;
+        private Button btnCSRetvedFileSavePath;
+        private TextBox tbRetrievedFileSavePath;
         private Label label3;
         private Label label2;
         private Label labelProgressMsg;
         private Label label1;
         private TextBox tbAddr1;
-        private Button btnAddr1;
+        private Button btnCSAddr1;
         private Label label6;
         private TextBox tbRecAddr;
-        private Button btnRecAddr;
+        private Button btnCSRecAddr;
         private Label label9;
         private TextBox tbAddr2;
-        private Button btnAddr2;
+        private Button btnCSAddr2;
         private GroupBox groupBox1;
         private CheckBox cbAddr1;
         private CheckBox cbAddr2;

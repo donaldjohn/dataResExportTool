@@ -105,6 +105,7 @@
         <EntityTypeShape EntityType="Model.S_CHINA_BRAND" Width="1.5" PointX="41.375" PointY="18.75" />
         <EntityTypeShape EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" Width="1.5" PointX="21.375" PointY="42.75" />
         <EntityTypeShape EntityType="Model.S_RUSSIAN_PATENT_DESCRIPTION" Width="1.5" PointX="34.375" PointY="42.75" />
+        <EntityTypeShape EntityType="Model.W_SJZYZTSXXX" Width="1.5" PointX="36.375" PointY="42.75" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

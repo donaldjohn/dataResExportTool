@@ -125,5 +125,6 @@ namespace TheDataResourceImporter
         public DbSet<S_CHINA_BRAND> S_CHINA_BRAND { get; set; }
         public DbSet<S_JOURNAL_PROJECT_ABSTRACT> S_JOURNAL_PROJECT_ABSTRACT { get; set; }
         public DbSet<S_RUSSIAN_PATENT_DESCRIPTION> S_RUSSIAN_PATENT_DESCRIPTION { get; set; }
+        public DbSet<W_SJZYZTSXXX> W_SJZYZTSXXX { get; set; }
     }
 }

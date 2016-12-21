@@ -467,6 +467,9 @@
     <Compile Include="Utils\MiscUtil.cs" />
     <Compile Include="Utils\OracleDb.cs" />
     <Compile Include="Utils\TRSUtil.cs" />
+    <Compile Include="W_SJZYZTSXXX.cs">
+      <DependentUpon>DataResourceEntities.tt</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
     </EmbeddedResource>

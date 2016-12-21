@@ -20,35 +20,75 @@ namespace TheDataResourceExporter
                 InitializeComponent();
 
                 DataSourceEntities entitiesDataSource = new DataSourceEntities();
-                //绑定数据类型 下拉列表
-                var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(dataType => "Y".Equals(dataType.HASEXPORTER)).ToList()
+                //绑定数据类型 下拉列表(查询条件：支持导出工具且已实现入库)
+                var availableDataTypes = from dataType in entitiesDataSource.S_DATA_RESOURCE_TYPES_DETAIL.Where(
+                    dataType => "Y".Equals(dataType.HASEXPORTER)
+                    &&
+                    "Y".Equals(dataType.IMPLEMENTED_IMPORT_LOGIC)
+                    ).ToList()
                                          orderby dataType.ID ascending
-                                         select new { diplayName = dataType.ID + "-" + dataType.CHINESE_NAME, selectedValue = dataType.CHINESE_NAME };
+                                         select
+                                         new
+                                         {
+                                             diplayName = dataType.ID + "-" + dataType.CHINESE_NAME,
+                                             selectedValue = dataType.CHINESE_NAME
+                                         };
+
                 cbFileType.DisplayMember = "diplayName";
                 cbFileType.ValueMember = "selectedValue";
-
                 cbFileType.DataSource = availableDataTypes.ToList();
 
-                //MessageUtil.SetMessage = SetLabelMsg;
                 MessageUtil.setTbDetail = SetTextBoxDetail;
                 MessageUtil.appendTbDetail = appendTextBoxDetail;
-                //添加日志输出
-                //MessageUtil.appendTbDetail += LogHelper.WriteLog;
 
+                //添加进度输出
                 MessageUtil.updateProgressIndicator = updateProgressIndicator;
-                //cbFileType.SelectedIndex = 0;
                 SetStyle(ControlStyles.UserPaint, true);
                 SetStyle(ControlStyles.AllPaintingInWmPaint, true); // 禁止擦除背景.  
-                SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲  
-
+                SetStyle(ControlStyles.DoubleBuffer, true); // 双缓冲
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"启动失败，请确保安装了必备包内软件！！！\n错误详情：“{ex.Message}”");
                 throw;
             }
+        }
 
+        private void getAndSetDataStoragePath(DataSourceEntities entitiesDataSource, string dataResName)
+        {
+            string addr1 = "", addr2 = "", recAddr = "";
 
+            var queriedBianMuEnumerator = entitiesDataSource.W_SJZYZTSXXX.Where(rec => (!string.IsNullOrEmpty(dataResName) && dataResName.Equals(rec.F_DATANAME)));
+
+            var targetBianMu = queriedBianMuEnumerator.FirstOrDefault();
+            if (null == targetBianMu)
+            {
+                MessageBox.Show("没有查询到指定类型的编目信息，请联系开发人员或手工指定提取数据位置");
+            }
+            else
+            {
+                addr1 = targetBianMu.F_ONEADDRESS;
+                if (!string.IsNullOrEmpty(addr1))
+                {
+                    addr1 = addr1.Trim();
+                }
+
+                addr2 = targetBianMu.F_TWOADDRESS;
+                if (!string.IsNullOrEmpty(addr1))
+                {
+                    addr2 = addr2.Trim();
+                }
+
+                recAddr = targetBianMu.F_RECOVERYADDRESS;
+                if (!string.IsNullOrEmpty(recAddr))
+                {
+                    recAddr = recAddr.Trim();
+                }
+            }
+
+            tbAddr1.Text = addr1;
+            tbAddr2.Text = addr2;
+            tbRecAddr.Text = recAddr;
         }
 
 
@@ -316,7 +356,23 @@ namespace TheDataResourceExporter
 
         private void cbFileType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (-1 == cbFileType.SelectedIndex)
+            {
+                return;
+            }
+
+
             var fileType = cbFileType.SelectedValue;
+
+            var fileTypeInBianMu = fileType;//如果和编目的数据资源类型不同,需要转换
+
+
+
+
+            using (DataSourceEntities dataSourceEntities = new DataSourceEntities())
+            {
+                getAndSetDataStoragePath(dataSourceEntities, fileTypeInBianMu.ToString());
+            }
 
             //清空文件路径
             filePaths = null;
@@ -353,5 +409,9 @@ namespace TheDataResourceExporter
 
         }
 
+        private void btnGetDataStoragePath_Click(object sender, EventArgs e)
+        {
+            cbFileType_SelectedIndexChanged(sender, e);
+        }
     }
 }

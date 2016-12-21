@@ -3380,6 +3380,61 @@
           <Property Name="FILE_PATH" Type="varchar2" MaxLength="1000" />
           <Property Name="SESSION_INDEX" Type="number" Precision="38" Scale="0" />
         </EntityType>
+        <EntityType Name="W_SJZYZTSXXX">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="number" Precision="20" Scale="0" Nullable="false" />
+          <Property Name="F_DATANUM" Type="varchar2" MaxLength="32" />
+          <Property Name="F_DATANAME" Type="varchar2" MaxLength="128" />
+          <Property Name="F_DATACLASS" Type="varchar2" MaxLength="32" />
+          <Property Name="F_DATABIGCLASS" Type="varchar2" MaxLength="64" />
+          <Property Name="F_DATALITCLASS" Type="varchar2" MaxLength="64" />
+          <Property Name="F_DATANEEDNO" Type="varchar2" MaxLength="32" />
+          <Property Name="F_DATACOUNTRY" Type="varchar2" MaxLength="100" />
+          <Property Name="F_STARTTIME" Type="date" />
+          <Property Name="F_ENDTIME" Type="date" />
+          <Property Name="F_TIMEREMARK" Type="varchar2" MaxLength="512" />
+          <Property Name="F_DATALANG" Type="varchar2" MaxLength="100" />
+          <Property Name="F_DATATOTALNUM" Type="number" Precision="10" Scale="0" />
+          <Property Name="F_UPDATECYCLE" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_DATAFORMAT" Type="varchar2" MaxLength="100" />
+          <Property Name="F_PACKAGEFORMAT" Type="varchar2" MaxLength="100" />
+          <Property Name="F_DATATYPE" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_ISAPPLIED" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_ISSOLD" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_DATASOURCE" Type="varchar2" MaxLength="200" />
+          <Property Name="F_DATAORG" Type="varchar2" MaxLength="32" />
+          <Property Name="F_ISSTRUCTURED" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_COLLECTIONMETHODS" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_KEEPINGORG" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_KEEPINGORGID" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_KEEPTIME" Type="date" />
+          <Property Name="F_ISHOTSPOT" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_MANAGELEVEL" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_APPLYSYSTEM" Type="varchar2" MaxLength="1024" />
+          <Property Name="F_USEDESCRIBE" Type="varchar2" MaxLength="1024" />
+          <Property Name="F_DATAMISS" Type="varchar2" MaxLength="1024" />
+          <Property Name="F_DATAREMARK" Type="varchar2" MaxLength="4000" />
+          <Property Name="F_DESCDOCUMENT" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_ONEMEDIUM" Type="varchar2" MaxLength="128" />
+          <Property Name="F_ONEADDRESS" Type="varchar2" MaxLength="1000" />
+          <Property Name="F_ONEDATAADD" Type="varchar2" MaxLength="256" />
+          <Property Name="F_ONECAPACITY" Type="float" Precision="18" Scale="0" />
+          <Property Name="F_TWOMEDIUM" Type="varchar2" MaxLength="128" />
+          <Property Name="F_TWOADDRESS" Type="varchar2" MaxLength="1000" />
+          <Property Name="F_TWODATAADD" Type="varchar2" MaxLength="256" />
+          <Property Name="F_RECOVERYMEDIUM" Type="varchar2" MaxLength="128" />
+          <Property Name="F_RECOVERYADDRESS" Type="varchar2" MaxLength="1000" />
+          <Property Name="F_RECOVERYDATAADD" Type="varchar2" MaxLength="256" />
+          <Property Name="F_RECOVERYCAPACITY" Type="float" Precision="18" Scale="0" />
+          <Property Name="F_STATUS" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_ISRECOVERY" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_TWOCAPACITY" Type="float" Precision="18" Scale="0" />
+          <Property Name="F_CATALOGUER" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_CATALOGUERID" Type="varchar2" MaxLength="2000" />
+          <Property Name="F_STSJNAME" Type="varchar2" MaxLength="50" />
+        </EntityType>
         <EntityContainer Name="ModelStoreContainer">
           <EntitySet Name="IMPORT_ERROR" EntityType="Self.IMPORT_ERROR" Schema="DRMS" store:Type="Tables" />
           <EntitySet Name="IMPORT_SESSION" EntityType="Self.IMPORT_SESSION" Schema="DRMS" store:Type="Tables" />
@@ -3481,6 +3536,7 @@
           <EntitySet Name="S_WORLD_LEGAL_STATUS" EntityType="Self.S_WORLD_LEGAL_STATUS" Schema="DRMS" store:Type="Tables" />
           <EntitySet Name="S_WORLD_PATENT_LAWSTATUS" EntityType="Self.S_WORLD_PATENT_LAWSTATUS" Schema="DRMS" store:Type="Tables" />
           <EntitySet Name="S_ZONE_CODE_BASE" EntityType="Self.S_ZONE_CODE_BASE" Schema="DRMS" store:Type="Tables" />
+          <EntitySet Name="W_SJZYZTSXXX" EntityType="Self.W_SJZYZTSXXX" Schema="DRMS" store:Type="Tables" />
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -3587,6 +3643,7 @@
           <EntitySet Name="S_CHINA_BRAND" EntityType="Model.S_CHINA_BRAND" />
           <EntitySet Name="S_JOURNAL_PROJECT_ABSTRACT" EntityType="Model.S_JOURNAL_PROJECT_ABSTRACT" />
           <EntitySet Name="S_RUSSIAN_PATENT_DESCRIPTION" EntityType="Model.S_RUSSIAN_PATENT_DESCRIPTION" />
+          <EntitySet Name="W_SJZYZTSXXX" EntityType="Model.W_SJZYZTSXXX" />
           </EntityContainer>
         <EntityType Name="IMPORT_ERROR">
           <Key>
@@ -6962,6 +7019,61 @@
           <Property Name="ORI_CLASSIFICATIONLOCARNO" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="OTH_CLASSIFICATIONLOCARNO" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="INVENTIONTITLE" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="W_SJZYZTSXXX">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Decimal" Nullable="false" Precision="20" Scale="0" />
+          <Property Name="F_DATANUM" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATANAME" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATACLASS" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATABIGCLASS" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATALITCLASS" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATANEEDNO" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATACOUNTRY" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="F_STARTTIME" Type="DateTime" />
+          <Property Name="F_ENDTIME" Type="DateTime" />
+          <Property Name="F_TIMEREMARK" Type="String" MaxLength="512" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATALANG" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATATOTALNUM" Type="Int32" />
+          <Property Name="F_UPDATECYCLE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATAFORMAT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="F_PACKAGEFORMAT" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATATYPE" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_ISAPPLIED" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_ISSOLD" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATASOURCE" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATAORG" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="F_ISSTRUCTURED" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_COLLECTIONMETHODS" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_KEEPINGORG" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_KEEPINGORGID" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_KEEPTIME" Type="DateTime" />
+          <Property Name="F_ISHOTSPOT" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_MANAGELEVEL" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_APPLYSYSTEM" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="F_USEDESCRIBE" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATAMISS" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="F_DATAREMARK" Type="String" MaxLength="4000" FixedLength="false" Unicode="false" />
+          <Property Name="F_DESCDOCUMENT" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_ONEMEDIUM" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="F_ONEADDRESS" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="F_ONEDATAADD" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="F_ONECAPACITY" Type="Decimal" Precision="6" Scale="0" />
+          <Property Name="F_TWOMEDIUM" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="F_TWOADDRESS" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="F_TWODATAADD" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="F_RECOVERYMEDIUM" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="F_RECOVERYADDRESS" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="F_RECOVERYDATAADD" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="F_RECOVERYCAPACITY" Type="Decimal" Precision="6" Scale="0" />
+          <Property Name="F_STATUS" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_ISRECOVERY" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_TWOCAPACITY" Type="Decimal" Precision="6" Scale="0" />
+          <Property Name="F_CATALOGUER" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_CATALOGUERID" Type="String" MaxLength="2000" FixedLength="false" Unicode="false" />
+          <Property Name="F_STSJNAME" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -10440,6 +10552,62 @@
                 <ScalarProperty Name="STA_PUB_KIND" ColumnName="STA_PUB_KIND" />
                 <ScalarProperty Name="STA_PUB_NUMBER" ColumnName="STA_PUB_NUMBER" />
                 <ScalarProperty Name="STA_PUB_COUNTRY" ColumnName="STA_PUB_COUNTRY" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="W_SJZYZTSXXX">
+            <EntityTypeMapping TypeName="Model.W_SJZYZTSXXX">
+              <MappingFragment StoreEntitySet="W_SJZYZTSXXX">
+                <ScalarProperty Name="F_STSJNAME" ColumnName="F_STSJNAME" />
+                <ScalarProperty Name="F_CATALOGUERID" ColumnName="F_CATALOGUERID" />
+                <ScalarProperty Name="F_CATALOGUER" ColumnName="F_CATALOGUER" />
+                <ScalarProperty Name="F_TWOCAPACITY" ColumnName="F_TWOCAPACITY" />
+                <ScalarProperty Name="F_ISRECOVERY" ColumnName="F_ISRECOVERY" />
+                <ScalarProperty Name="F_STATUS" ColumnName="F_STATUS" />
+                <ScalarProperty Name="F_RECOVERYCAPACITY" ColumnName="F_RECOVERYCAPACITY" />
+                <ScalarProperty Name="F_RECOVERYDATAADD" ColumnName="F_RECOVERYDATAADD" />
+                <ScalarProperty Name="F_RECOVERYADDRESS" ColumnName="F_RECOVERYADDRESS" />
+                <ScalarProperty Name="F_RECOVERYMEDIUM" ColumnName="F_RECOVERYMEDIUM" />
+                <ScalarProperty Name="F_TWODATAADD" ColumnName="F_TWODATAADD" />
+                <ScalarProperty Name="F_TWOADDRESS" ColumnName="F_TWOADDRESS" />
+                <ScalarProperty Name="F_TWOMEDIUM" ColumnName="F_TWOMEDIUM" />
+                <ScalarProperty Name="F_ONECAPACITY" ColumnName="F_ONECAPACITY" />
+                <ScalarProperty Name="F_ONEDATAADD" ColumnName="F_ONEDATAADD" />
+                <ScalarProperty Name="F_ONEADDRESS" ColumnName="F_ONEADDRESS" />
+                <ScalarProperty Name="F_ONEMEDIUM" ColumnName="F_ONEMEDIUM" />
+                <ScalarProperty Name="F_DESCDOCUMENT" ColumnName="F_DESCDOCUMENT" />
+                <ScalarProperty Name="F_DATAREMARK" ColumnName="F_DATAREMARK" />
+                <ScalarProperty Name="F_DATAMISS" ColumnName="F_DATAMISS" />
+                <ScalarProperty Name="F_USEDESCRIBE" ColumnName="F_USEDESCRIBE" />
+                <ScalarProperty Name="F_APPLYSYSTEM" ColumnName="F_APPLYSYSTEM" />
+                <ScalarProperty Name="F_MANAGELEVEL" ColumnName="F_MANAGELEVEL" />
+                <ScalarProperty Name="F_ISHOTSPOT" ColumnName="F_ISHOTSPOT" />
+                <ScalarProperty Name="F_KEEPTIME" ColumnName="F_KEEPTIME" />
+                <ScalarProperty Name="F_KEEPINGORGID" ColumnName="F_KEEPINGORGID" />
+                <ScalarProperty Name="F_KEEPINGORG" ColumnName="F_KEEPINGORG" />
+                <ScalarProperty Name="F_COLLECTIONMETHODS" ColumnName="F_COLLECTIONMETHODS" />
+                <ScalarProperty Name="F_ISSTRUCTURED" ColumnName="F_ISSTRUCTURED" />
+                <ScalarProperty Name="F_DATAORG" ColumnName="F_DATAORG" />
+                <ScalarProperty Name="F_DATASOURCE" ColumnName="F_DATASOURCE" />
+                <ScalarProperty Name="F_ISSOLD" ColumnName="F_ISSOLD" />
+                <ScalarProperty Name="F_ISAPPLIED" ColumnName="F_ISAPPLIED" />
+                <ScalarProperty Name="F_DATATYPE" ColumnName="F_DATATYPE" />
+                <ScalarProperty Name="F_PACKAGEFORMAT" ColumnName="F_PACKAGEFORMAT" />
+                <ScalarProperty Name="F_DATAFORMAT" ColumnName="F_DATAFORMAT" />
+                <ScalarProperty Name="F_UPDATECYCLE" ColumnName="F_UPDATECYCLE" />
+                <ScalarProperty Name="F_DATATOTALNUM" ColumnName="F_DATATOTALNUM" />
+                <ScalarProperty Name="F_DATALANG" ColumnName="F_DATALANG" />
+                <ScalarProperty Name="F_TIMEREMARK" ColumnName="F_TIMEREMARK" />
+                <ScalarProperty Name="F_ENDTIME" ColumnName="F_ENDTIME" />
+                <ScalarProperty Name="F_STARTTIME" ColumnName="F_STARTTIME" />
+                <ScalarProperty Name="F_DATACOUNTRY" ColumnName="F_DATACOUNTRY" />
+                <ScalarProperty Name="F_DATANEEDNO" ColumnName="F_DATANEEDNO" />
+                <ScalarProperty Name="F_DATALITCLASS" ColumnName="F_DATALITCLASS" />
+                <ScalarProperty Name="F_DATABIGCLASS" ColumnName="F_DATABIGCLASS" />
+                <ScalarProperty Name="F_DATACLASS" ColumnName="F_DATACLASS" />
+                <ScalarProperty Name="F_DATANAME" ColumnName="F_DATANAME" />
+                <ScalarProperty Name="F_DATANUM" ColumnName="F_DATANUM" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
               </MappingFragment>
             </EntityTypeMapping>

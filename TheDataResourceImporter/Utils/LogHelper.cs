@@ -23,12 +23,6 @@ namespace TheDataResourceExporter.Utils
 
             string dateStr = ExportManger.bathStartTime.ToString("[yyyy年MM月dd日 HH：mm：ss FF]");
 
-            if (string.IsNullOrEmpty(ExportManger.bathId))
-            {
-                ExportManger.bathId = "";
-            }
-
-
             if (!Directory.Exists(dest))
             {
                 try
@@ -43,14 +37,13 @@ namespace TheDataResourceExporter.Utils
             }
             try
             {
-                dest = dest + Path.DirectorySeparatorChar + dateStr + "-[" + ExportManger.bathId + "]-" + txtName + ".log";
+                dest = dest + Path.DirectorySeparatorChar + dateStr + "-" + txtName + ".log";
                 using (StreamWriter sw = new StreamWriter(dest, true, Encoding.Default))
                 {
                     DateTime current = System.DateTime.Now;
                     string timeStamp = "[" + current.ToLocalTime().ToString() + " " + current.Millisecond + "]";
                     //添加消息换行
                     text = Environment.NewLine + timeStamp + text;
-
                     sw.WriteLine(text);
                 }
             }
@@ -77,7 +70,7 @@ namespace TheDataResourceExporter.Utils
             {
                 lock (typeof(LogHelper))
                 {
-                    WriteImportLog(logDir, "Import_Error", msg);
+                    WriteImportLog(logDir, "Export_Error", msg);
                 }
             });
             task.Start();

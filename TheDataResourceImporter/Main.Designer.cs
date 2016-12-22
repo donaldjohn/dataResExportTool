@@ -450,6 +450,7 @@ namespace TheDataResourceExporter
             this.btnCSRetvedFileSavePath.TabIndex = 40;
             this.btnCSRetvedFileSavePath.Text = "选择";
             this.btnCSRetvedFileSavePath.UseVisualStyleBackColor = true;
+            this.btnCSRetvedFileSavePath.Click += new System.EventHandler(this.btnCSRetvedFileSavePath_Click);
             // 
             // tbRetrievedFileSavePath
             // 
@@ -512,7 +513,7 @@ namespace TheDataResourceExporter
             this.btnCSAddr1.TabIndex = 10;
             this.btnCSAddr1.Text = "选择";
             this.btnCSAddr1.UseVisualStyleBackColor = true;
-            this.btnCSAddr1.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSAddr1.Click += new System.EventHandler(this.btnCSAddr1_Click);
             // 
             // label6
             // 
@@ -540,7 +541,7 @@ namespace TheDataResourceExporter
             this.btnCSRecAddr.TabIndex = 10;
             this.btnCSRecAddr.Text = "选择";
             this.btnCSRecAddr.UseVisualStyleBackColor = true;
-            this.btnCSRecAddr.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSRecAddr.Click += new System.EventHandler(this.btnCSRecAddr_Click);
             // 
             // label9
             // 
@@ -568,7 +569,7 @@ namespace TheDataResourceExporter
             this.btnCSAddr2.TabIndex = 10;
             this.btnCSAddr2.Text = "选择";
             this.btnCSAddr2.UseVisualStyleBackColor = true;
-            this.btnCSAddr2.Click += new System.EventHandler(this.btn_Choose_Click);
+            this.btnCSAddr2.Click += new System.EventHandler(this.btnCSAddr2_Click);
             // 
             // groupBox1
             // 

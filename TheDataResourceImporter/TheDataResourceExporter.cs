@@ -57,7 +57,7 @@ namespace TheDataResourceExporter
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
         }
 
-        public static bool BeginImport(string[] AllFilePaths, string fileType)
+        public static bool BeginExport(string[] AllFilePaths, string fileType)
         {
             try
             {

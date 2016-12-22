@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -58,12 +59,14 @@ namespace TheDataResourceExporter
         {
             string addr1 = "", addr2 = "", recAddr = "";
 
-            var queriedBianMuEnumerator = entitiesDataSource.W_SJZYZTSXXX.Where(rec => (!string.IsNullOrEmpty(dataNum) && dataNum.Equals(rec.F_DATANAME)));
+            var queriedBianMuEnumerator = entitiesDataSource.W_SJZYZTSXXX.Where(rec => (!string.IsNullOrEmpty(dataNum) && dataNum.Equals(rec.F_DATANUM)));
 
             var targetBianMu = queriedBianMuEnumerator.FirstOrDefault();
             if (null == targetBianMu)
             {
-                MessageBox.Show("没有查询到指定类型的编目信息，请联系开发人员或手工指定提取数据位置");
+                var message = "没有查询到指定类型的编目信息，请联系开发人员或手工指定提取数据位置";
+                MessageUtil.DoSetTBDetail(message);
+                MessageBox.Show(message);
             }
             else
             {
@@ -74,7 +77,7 @@ namespace TheDataResourceExporter
                 }
 
                 addr2 = targetBianMu.F_TWOADDRESS;
-                if (!string.IsNullOrEmpty(addr1))
+                if (!string.IsNullOrEmpty(addr2))
                 {
                     addr2 = addr2.Trim();
                 }
@@ -127,11 +130,69 @@ namespace TheDataResourceExporter
 
                     filePaths = new string[] { foldPath };
                 }
-
-
-
             }
         }
+
+        private void btnCSAddr1_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
+
+            folderDialogEx.ShowNewFolderButton = false;
+            folderDialogEx.Description = "请选择本地备份1路径";
+            folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+
+            if (folderDialogEx.ShowDialog() == DialogResult.OK)
+            {
+                string foldPath = folderDialogEx.SelectedPath;
+                tbAddr1.Text = foldPath;
+            }
+        }
+
+        private void btnCSRecAddr_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
+
+            folderDialogEx.ShowNewFolderButton = false;
+            folderDialogEx.Description = "请选择灾备备份路径";
+            folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+
+            if (folderDialogEx.ShowDialog() == DialogResult.OK)
+            {
+                string foldPath = folderDialogEx.SelectedPath;
+                tbRecAddr.Text = foldPath;
+            }
+        }
+
+        private void btnCSAddr2_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
+
+            folderDialogEx.ShowNewFolderButton = false;
+            folderDialogEx.Description = "请选择本地备份2路径";
+            folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+
+            if (folderDialogEx.ShowDialog() == DialogResult.OK)
+            {
+                string foldPath = folderDialogEx.SelectedPath;
+
+                tbAddr2.Text = foldPath;
+            }
+        }
+
+        private void btnCSRetvedFileSavePath_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
+            folderDialogEx.ShowNewFolderButton = false;
+            folderDialogEx.Description = "请选择文件路径";
+            folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
+
+            if (folderDialogEx.ShowDialog() == DialogResult.OK)
+            {
+                string foldPath = folderDialogEx.SelectedPath;
+                tbRetrievedFileSavePath.Text = foldPath;
+            }
+        }
+
 
         private void btnStart_Click(object sender, EventArgs e)
         {
@@ -142,28 +203,65 @@ namespace TheDataResourceExporter
             //清空强制终止标识
             ExportManger.forcedStop = false;
 
+            //清空消息
             MessageUtil.setTbDetail("");
-
-            if (string.IsNullOrEmpty(tbHDFilePath.Text) || null == filePaths || filePaths.Length == 0)
-            {
-                MessageBox.Show("请选择至少选择一个文件！");
-                return;
-            }
 
             var fileType = cbFileType.SelectedValue.ToString();
 
             //未选中文件类型
             if (String.IsNullOrEmpty(fileType))
             {
-                MessageBox.Show("请选择数据类型！");
+                showMessageBox("请选择数据类型！");
                 return;
+            }
+
+
+            List<String> storagePaths = new List<string>();
+
+            var addrStr1 = tbAddr1.Text;
+            if (cbAddr1.Checked && !string.IsNullOrEmpty(addrStr1))
+            {
+                storagePaths.AddRange(addrStr1.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+            }
+
+            var addrStr2 = tbAddr2.Text;
+            if (cbAddr2.Checked && !string.IsNullOrEmpty(addrStr2))
+            {
+                storagePaths.AddRange(addrStr2.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+            }
+
+            var addrRecStr = tbRecAddr.Text;
+            if (cbRecAddr.Checked && !string.IsNullOrEmpty(addrRecStr))
+            {
+                storagePaths.AddRange(addrRecStr.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+            }
+
+            if (0 == storagePaths.Count())
+            {
+                var message = "请指定至少一个数据位置!";
+                showMessageBox(message);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(tbHDFilePath.Text) || null == filePaths || filePaths.Length == 0)
+            {
+                showMessageBox("请选择至少选择一个号单文件！");
+                return;
+            }
+
+
+            var retrivedFileSavePath = tbRetrievedFileSavePath.Text;
+
+            if (String.IsNullOrEmpty(retrivedFileSavePath))
+            {
+                showMessageBox("请指定提取文件保存位置!");
             }
 
 
             SetEnabled(btn_ChooseHD, false);
             SetEnabled(btnStart, false);
 
-            Func<string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginImport;
+            Func<string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginExport;
 
             ExportManger.importStartTime = System.DateTime.Now;
 
@@ -181,13 +279,16 @@ namespace TheDataResourceExporter
                     {
                         MessageBox.Show(ex.Message);
                     }
-
                     SetEnabled(btn_ChooseHD, true);
                     SetEnabled(btnStart, true);
                 }, null);
         }
 
-
+        private static void showMessageBox(string message)
+        {
+            MessageUtil.DoSetTBDetail(message);
+            MessageBox.Show(message);
+        }
 
         delegate void SetTextBoxDetailHander(string msg);
         public void SetTextBoxDetail(string msg)
@@ -198,7 +299,6 @@ namespace TheDataResourceExporter
             }
             else
             {
-                //lock (textBoxDetail)
                 {
                     textBoxDetail.Text = msg;
                 }
@@ -263,11 +363,8 @@ namespace TheDataResourceExporter
             }
             else
             {
-                //textBoxDetail.Text = textBoxDetail.Text + msg;
-                //lock (textBoxDetail)
                 {
                     textBoxDetail.SelectionStart = textBoxDetail.Text.Length;
-                    //textBoxDetail.AppendText(msg);
                     textBoxDetail.Text = msg;
                     textBoxDetail.ScrollToCaret();
                 }
@@ -280,7 +377,6 @@ namespace TheDataResourceExporter
 
         public void SetEnabled(Control control, bool flag)
         {
-
             if (this.InvokeRequired)
             {
                 this.Invoke(new SetEnabledHander(SetEnabled), control, flag);
@@ -335,8 +431,13 @@ namespace TheDataResourceExporter
 
 
             var fileType = cbFileType.SelectedValue.ToString();
+            if (string.IsNullOrEmpty(fileType))
+            {
+                return;
+            }
 
             var fDataNum = "";
+
             switch (fileType)
             {
                 case "中国生物序列深加工数据-中文": fDataNum = "045"; break;
@@ -356,11 +457,6 @@ namespace TheDataResourceExporter
                 case "中国专利的判决书数据": fDataNum = "506"; break;
                 case "中国中药专利翻译数据": fDataNum = "052"; break;
             }
-
-
-
-
-            var fDataNum = fileType;//如果和编目的数据资源类型不同,需要转换
 
             using (DataSourceEntities dataSourceEntities = new DataSourceEntities())
             {

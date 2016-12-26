@@ -218,8 +218,10 @@ namespace TheDataResourceExporter
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
                                                        select "'" + orginValue + "'").ToList();
 
+                MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
                 var result = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+
                 if (null == result || 0 == result.Count())
                 {
                     MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
@@ -231,21 +233,22 @@ namespace TheDataResourceExporter
 
                 foreach (var entity in result)
                 {
-                    if (String.IsNullOrEmpty(entity.PATH_FILE))//忽略为空的路径
+                    if (!String.IsNullOrEmpty(entity.PATH_FILE))//忽略为空的路径
                     {
                         allRelativePaths.Add(entity.PATH_FILE);
                     }
 
-                    if (String.IsNullOrEmpty(entity.PATH_JPG))
+                    if (!String.IsNullOrEmpty(entity.PATH_JPG))
                     {
                         allRelativePaths.Add(entity.PATH_JPG);
                     }
 
-                    if (String.IsNullOrEmpty(entity.EXIST_JPG_SF))
+                    if (!String.IsNullOrEmpty(entity.PATH_JPG_SF))
                     {
-                        allRelativePaths.Add(entity.EXIST_JPG_SF);
+                        allRelativePaths.Add(entity.PATH_JPG_SF);
                     }
                 }
+
 
                 if (0 == allRelativePaths.Count)
                 {
@@ -253,9 +256,11 @@ namespace TheDataResourceExporter
                     return true;
                 }
 
+                MessageUtil.DoSetTBDetail($"找到{result.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
                 //找寻需要解析的文件并保存到用户指定的位置
 
-
+                saveRetrivedFilesInArchive(storagePaths, retrievedFileSavePath, allRelativePaths);
 
 
             }
@@ -281,9 +286,12 @@ namespace TheDataResourceExporter
                 string whereStr = $"where {fieldName} = {haoDanFieldValue}";
                 //查询字段值
                 string esqlQuery = $"select * from {tableName} {whereStr}";
-                result = dbSet.SqlQuery(esqlQuery).AsNoTracking().ToList();
+                var targetEntity = dbSet.SqlQuery(esqlQuery).AsNoTracking().ToList().FirstOrDefault();
+                if (null != targetEntity)
+                {
+                    result.Add(targetEntity);
+                }
             }
-
             return result;
         }
 
@@ -293,8 +301,29 @@ namespace TheDataResourceExporter
         /// <param name="storagePaths"></param>
         /// <param name="retrievedFileSavePath"></param>
         /// <param name="allRelativePaths"></param>
-        private static void saveRetrivedFiles(String[] storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
+        private static void saveRetrivedFilesInArchive(String[] storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
         {
+
+            foreach (var relativePathWithArchiveInnerPath in allRelativePaths)
+            {
+                bool canFileFile = false;
+
+               var zipFileFullNameLength = relativePathWithArchiveInnerPath.IndexOf(".zip") + 5;
+               var zipFileFullName = relativePathWithArchiveInnerPath.Substring(0, zipFileFullNameLength);
+
+               
+
+
+
+
+
+                if (!canFileFile) //没有找到文件
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到指定的文件，");
+                }
+            }
+
+
 
 
 

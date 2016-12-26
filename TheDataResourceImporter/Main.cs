@@ -107,6 +107,7 @@ namespace TheDataResourceExporter
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     filePaths = null;
+
                     tbHDFilePath.Text = string.Empty;
 
                     filePaths = new string[] { dialog.FileName };
@@ -211,10 +212,9 @@ namespace TheDataResourceExporter
             //未选中文件类型
             if (String.IsNullOrEmpty(fileType))
             {
-                showMessageBox("请选择数据类型！");
+                MessageUtil.showMessageBoxWithErrorLog("请选择数据类型！");
                 return;
             }
-
 
             List<String> storagePaths = new List<string>();
 
@@ -239,13 +239,15 @@ namespace TheDataResourceExporter
             if (0 == storagePaths.Count())
             {
                 var message = "请指定至少一个数据位置!";
-                showMessageBox(message);
+                MessageUtil.showMessageBoxWithErrorLog(message);
                 return;
             }
 
+            var HDFilePath = tbHDFilePath.Text;
+
             if (string.IsNullOrEmpty(tbHDFilePath.Text) || null == filePaths || filePaths.Length == 0)
             {
-                showMessageBox("请选择至少选择一个号单文件！");
+                MessageUtil.showMessageBoxWithErrorLog("请选择至少选择一个号单文件！");
                 return;
             }
 
@@ -254,18 +256,19 @@ namespace TheDataResourceExporter
 
             if (String.IsNullOrEmpty(retrivedFileSavePath))
             {
-                showMessageBox("请指定提取文件保存位置!");
+                MessageUtil.showMessageBoxWithErrorLog("请指定提取文件保存位置!");
             }
-
+            
 
             SetEnabled(btn_ChooseHD, false);
+
             SetEnabled(btnStart, false);
 
-            Func<string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginExport;
+            Func<string[], string, string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginExport;
 
             ExportManger.importStartTime = System.DateTime.Now;
 
-            func.BeginInvoke(filePaths, fileType.Trim(),
+            func.BeginInvoke(filePaths, fileType.Trim(), storagePaths.ToArray(), retrivedFileSavePath,
                 delegate (IAsyncResult ia)
                 {
                     try
@@ -284,11 +287,6 @@ namespace TheDataResourceExporter
                 }, null);
         }
 
-        private static void showMessageBox(string message)
-        {
-            MessageUtil.DoSetTBDetail(message);
-            MessageBox.Show(message);
-        }
 
         delegate void SetTextBoxDetailHander(string msg);
         public void SetTextBoxDetail(string msg)
@@ -487,7 +485,7 @@ namespace TheDataResourceExporter
             bathHistoryForm.Show();
         }
 
-        private void tb_FilePath_TextChanged(object sender, EventArgs e)
+        private void tbHDFilePath_TextChanged(object sender, EventArgs e)
         {
             var inputedpath = tbHDFilePath.Text;
             filePaths = new string[] { inputedpath };

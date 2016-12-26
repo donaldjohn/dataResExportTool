@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace TheDataResourceExporter.Utils
 {
@@ -43,25 +44,18 @@ namespace TheDataResourceExporter.Utils
             //添加消息换行
             msg = Environment.NewLine + timeStamp + Environment.NewLine + msg;
 
-            //var task = new Task(()=> appendTbDetail?.Invoke(msg));
-            //task.Start();
-            //异步更新
-            //appendTbDetail?.BeginInvoke(msg, null, null);
-
-
-            //停止输出详细日志
-            //LogHelper.WriteImportLog(msg);
-
             appendTbDetail?.Invoke(msg);
         }
 
         public static void DoupdateProgressIndicator(int totalCount, int handledCount, int handledXMLCount, int handledDirCount, string achievePath)
         {
             updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath);
-            //异步更新
-            //var task = new Task(() => updateProgressIndicator?.Invoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath));
-            //task.Start();
-            //updateProgressIndicator?.BeginInvoke(totalCount, handledCount, handledXMLCount, handledDirCount, achievePath, ia => { }, null);
+        }
+
+        public static void showMessageBoxWithErrorLog(string message)
+        {
+            MessageUtil.DoSetTBDetail(message);
+            MessageBox.Show(message);
         }
     }
 }

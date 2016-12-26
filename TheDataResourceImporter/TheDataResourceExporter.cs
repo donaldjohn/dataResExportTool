@@ -19,6 +19,10 @@ using System.Threading.Tasks.Dataflow;
 using System.Threading;
 using System.Text.RegularExpressions;
 using TheDataResourceImporter;
+using System.Data.Objects;
+using System.Data.EntityClient;
+using System.Data.SqlClient;
+using System.Data.Entity;
 
 namespace TheDataResourceExporter
 {
@@ -57,34 +61,31 @@ namespace TheDataResourceExporter
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
         }
 
-        public static bool BeginExport(string[] AllFilePaths, string fileType)
+        public static bool BeginExport(string[] AllHDFilePaths, string fileType, string[] storagePaths, string retrivedFileSavePath)
         {
             try
             {
                 errorMessageTopScope = "";
-                //importStartTime = System.DateTime.Now;
-                fileCount = AllFilePaths.Length;
+                fileCount = AllHDFilePaths.Length;
 
                 MessageUtil.DoAppendTBDetail("开始处理：");
-                #region 文件夹模式 解析符合条件的文件
-
+                #region 文件夹模式 查找文件夹下所有的号单文件
                 if (!Main.showFileDialog)//文件夹模式
                 {
-                    if (AllFilePaths.Length != 1) //文件夹模式只有一个文件夹路径
+                    if (AllHDFilePaths.Length != 1) //文件夹模式只有一个文件夹路径
                     {
-                        var message = $"{MiscUtil.jsonSerilizeObject(AllFilePaths)}文件夹路径不正确";
+                        var message = $"{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}文件夹路径不正确";
                         MessageUtil.DoAppendTBDetail(message);
                         LogHelper.WriteImportErrorLog(message);
                         return true;
                     }
 
-                    string dirPath = AllFilePaths[0];
+                    string dirPath = AllHDFilePaths[0];
 
                     if (string.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))//路径为空, 路径对应的文件夹不存在
                     {
                         var message = $"文件夹路径{dirPath}不正确";
-                        MessageUtil.DoAppendTBDetail(message);
-                        LogHelper.WriteImportErrorLog(message);
+                        MessageUtil.showMessageBoxWithErrorLog(message);
                         return true;
                     }
 
@@ -98,12 +99,15 @@ namespace TheDataResourceExporter
                     {
                         MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
                         LogHelper.WriteImportErrorLog("没有找到指定的文件");
+
+
+                        MessageUtil.showMessageBoxWithErrorLog($"指定的路径不正确{dirPath}，请选择正确的路径！");
                         return true;
                     }
                     else
                     {
-                        MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个符合条件的文件,它们是{Environment.NewLine + string.Join(Environment.NewLine, allFoundFilePaths)}");
-                        AllFilePaths = allFoundFilePaths;
+                        MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个号单文件,它们是{Environment.NewLine + string.Join(Environment.NewLine, allFoundFilePaths)}");
+                        AllHDFilePaths = allFoundFilePaths;
                     }
                 }
                 else//文件模式 只允许单选 2016年12月15日15:41:54
@@ -119,27 +123,25 @@ namespace TheDataResourceExporter
                     dataSourceEntites.Configuration.AutoDetectChangesEnabled = false;
                     dataSourceEntites.Configuration.ProxyCreationEnabled = false;
 
-                    foreach (string path in AllFilePaths)//遍历处理需要处理的路径
+                    foreach (string HDPath in AllHDFilePaths)//遍历处理需要处理的路径
                     {
                         //强制终止
                         if (forcedStop)
                         {
-                            MessageUtil.DoAppendTBDetail("强制终止了插入");
+                            MessageUtil.DoAppendTBDetail("强制终止了导出");
                             break;
                         }
-                        currentFile = path.Substring(path.LastIndexOf('\\') + 1);
+                        currentFile = HDPath.Substring(HDPath.LastIndexOf('\\') + 1);
                         try
                         {
-                            if (File.Exists(path))
+                            if (File.Exists(HDPath))
                             {
-                                ExportByPath(path, fileType, dataSourceEntites);
+                                ExportByPath(HDPath, fileType, storagePaths, retrivedFileSavePath, dataSourceEntites);
                             }
                             else
                             {
-                                MessageBox.Show($"指定的文件不存在{path}");
+                                MessageUtil.showMessageBoxWithErrorLog($"指定的号单文件不存在{HDPath}");
                             }
-                            MessageUtil.DoAppendTBDetail("正在写库，请稍候……");
-
                         }
                         catch (Exception ex)
                         {
@@ -148,7 +150,7 @@ namespace TheDataResourceExporter
                                 continue;
                             }
 
-                            var errorMsg = $"导出文件{currentFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{path}";
+                            var errorMsg = $"导出文件{currentFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}";
                             MessageUtil.DoSetTBDetail($"发生异常:{errorMsg}");
                             LogHelper.WriteImportErrorLog(errorMsg);
                             errorMessageTopScope += errorMsg;
@@ -160,8 +162,6 @@ namespace TheDataResourceExporter
                 GC.WaitForPendingFinalizers();
                 #endregion
 
-
-                //MessageUtil.DoAppendTBDetail($"当前批次运行完毕，处理了{bath.FILECOUNT}个文件，入库了{bath.HANDLED_ITEM_COUNT}条目，总耗时{bath.LAST_TIME}秒， 入库速度{bath.HANDLED_ITEM_COUNT / bath.LAST_TIME}件/秒");
 
                 if (!string.IsNullOrEmpty(errorMessageTopScope))
                 {
@@ -184,33 +184,152 @@ namespace TheDataResourceExporter
         }
 
 
-        public static bool ExportByPath(string filePath, string fileType, DataSourceEntities dataSourceEntites)
+        public static bool ExportByPath(string HDPath, string fileType, String[] storagePaths, String retrievedFileSavePath, DataSourceEntities dataSourceEntites)
         {
-            currentFile = filePath;
+            currentFile = HDPath;
+
             MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
-            MessageUtil.DoAppendTBDetail("当前文件：" + filePath);
+            MessageUtil.DoAppendTBDetail("当前号单文件：" + HDPath);
 
-            if (fileType == "中国商标")
-            {
-                export132(filePath, dataSourceEntites, "S_CHINA_BRAND");
-            }
-            return true;
-        }
-
-        private static void export132(string filePath, DataSourceEntities entiesContext, string tableName)
-        {
-            handledCount = 0;
-
-            FileInfo numFileInfo = new FileInfo(filePath);
+            FileInfo numFileInfo = new FileInfo(HDPath);
 
             if (!numFileInfo.Exists)
             {
-                MessageBox.Show("指定的号单文件有误，号单文件不存在");
-                return;
+                MessageUtil.showMessageBoxWithErrorLog("指定的号单文件有误，号单文件不存在");
+                return true;
             }
 
-            //解析号单
+            //数据库字段名
+            var haoDanFieldName = "";
+            var haoDanFieldValues = parseHaoDanFile(HDPath);
 
+            if (null == haoDanFieldValues || 0 == haoDanFieldValues.Count())
+            {
+                MessageUtil.showMessageBoxWithErrorLog("指定的号单文件有误，没解析到字段值");
+                return true;
+            }
+
+            //132
+            if (fileType == "中国商标")
+            {
+                haoDanFieldName = "MARK_CN_ID";
+                var whereStr = "";
+                //处理号单
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                                                       select "'" + orginValue + "'").ToList();
+
+
+                var result = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                if (null == result || 0 == result.Count())
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    return true;
+                }
+
+                //获取需要提取的文件的相对路径
+                List<string> allRelativePaths = new List<string>();
+
+                foreach (var entity in result)
+                {
+                    if (String.IsNullOrEmpty(entity.PATH_FILE))//忽略为空的路径
+                    {
+                        allRelativePaths.Add(entity.PATH_FILE);
+                    }
+
+                    if (String.IsNullOrEmpty(entity.PATH_JPG))
+                    {
+                        allRelativePaths.Add(entity.PATH_JPG);
+                    }
+
+                    if (String.IsNullOrEmpty(entity.EXIST_JPG_SF))
+                    {
+                        allRelativePaths.Add(entity.EXIST_JPG_SF);
+                    }
+                }
+
+                if (0 == allRelativePaths.Count)
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                    return true;
+                }
+
+                //找寻需要解析的文件并保存到用户指定的位置
+
+
+
+
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 查询号单文件中指定的记录
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entiesContext"></param>
+        /// <param name="dbSet"></param>
+        /// <param name="tableName"></param>
+        /// <param name="whereStr"></param>
+        /// <returns></returns>
+        private static List<TEntity> queryRecords<TEntity>(DataSourceEntities entiesContext, DbSet<TEntity> dbSet, string tableName, string fieldName, List<String> HaoDanFieldValuesLst) where TEntity : class
+        {
+            List<TEntity> result = new List<TEntity>();
+
+            foreach (var haoDanFieldValue in HaoDanFieldValuesLst)
+            {
+                string whereStr = $"where {fieldName} = {haoDanFieldValue}";
+                //查询字段值
+                string esqlQuery = $"select * from {tableName} {whereStr}";
+                result = dbSet.SqlQuery(esqlQuery).AsNoTracking().ToList();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 找到根据号单查询到的需要提取的文件保存到指定的路径
+        /// </summary>
+        /// <param name="storagePaths"></param>
+        /// <param name="retrievedFileSavePath"></param>
+        /// <param name="allRelativePaths"></param>
+        private static void saveRetrivedFiles(String[] storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
+        {
+
+
+
+
+
+
+        }
+
+
+        private static List<String> parseHaoDanFile(string fileHaoDanPath)
+        {
+            try
+            {
+                //解析号单
+                StreamReader sReader = new StreamReader(new FileStream(fileHaoDanPath, FileMode.Open));
+
+                var haoDanFieldValues = new List<string>();
+
+                //解析号单字段值
+                while (!sReader.EndOfStream)
+                {
+                    var currentLine = sReader.ReadLine();
+                    if (!string.IsNullOrEmpty(currentLine))
+                    {
+                        haoDanFieldValues.Add(currentLine.Trim());
+                    }
+                }
+                //去重
+                return haoDanFieldValues.Distinct().ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageUtil.showMessageBoxWithErrorLog($"解析号单文件{fileHaoDanPath}发生错误，{ex.Message}{ex.StackTrace}");
+                throw;
+            }
         }
     }
 }

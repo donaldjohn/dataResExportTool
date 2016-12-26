@@ -274,7 +274,7 @@ namespace TheDataResourceExporter
             this.tbHDFilePath.Name = "tbHDFilePath";
             this.tbHDFilePath.Size = new System.Drawing.Size(393, 21);
             this.tbHDFilePath.TabIndex = 9;
-            this.tbHDFilePath.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            this.tbHDFilePath.TextChanged += new System.EventHandler(this.tbHDFilePath_TextChanged);
             // 
             // label8
             // 
@@ -503,7 +503,7 @@ namespace TheDataResourceExporter
             this.tbAddr1.Name = "tbAddr1";
             this.tbAddr1.Size = new System.Drawing.Size(393, 21);
             this.tbAddr1.TabIndex = 9;
-            this.tbAddr1.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            this.tbAddr1.TextChanged += new System.EventHandler(this.tbHDFilePath_TextChanged);
             // 
             // btnCSAddr1
             // 
@@ -531,7 +531,7 @@ namespace TheDataResourceExporter
             this.tbRecAddr.Name = "tbRecAddr";
             this.tbRecAddr.Size = new System.Drawing.Size(393, 21);
             this.tbRecAddr.TabIndex = 9;
-            this.tbRecAddr.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            this.tbRecAddr.TextChanged += new System.EventHandler(this.tbHDFilePath_TextChanged);
             // 
             // btnCSRecAddr
             // 
@@ -559,7 +559,7 @@ namespace TheDataResourceExporter
             this.tbAddr2.Name = "tbAddr2";
             this.tbAddr2.Size = new System.Drawing.Size(393, 21);
             this.tbAddr2.TabIndex = 9;
-            this.tbAddr2.TextChanged += new System.EventHandler(this.tb_FilePath_TextChanged);
+            this.tbAddr2.TextChanged += new System.EventHandler(this.tbHDFilePath_TextChanged);
             // 
             // btnCSAddr2
             // 

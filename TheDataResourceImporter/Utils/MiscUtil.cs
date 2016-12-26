@@ -10,11 +10,14 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Xml;
 using TheDataResourceImporter;
+using System.Windows.Forms;
 
 namespace TheDataResourceExporter.Utils
 {
     class MiscUtil
     {
+
+
         public static IMPORT_ERROR getImpErrorInstance(string sessionId, string isZip, string zipOrDirPath, string zipPath = "", string errorMessage = "", string errorDetail = "")
         {
             var innerImpError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), IGNORED = "N", OCURREDTIME = DateTime.Now, REIMPORTED = "N", ISZIP = isZip, POINTOR = 0, SESSION_ID = sessionId, ZIP_OR_DIR_PATH = zipOrDirPath, ZIP_PATH = zipPath, ERROR_MESSAGE = errorMessage, ERROR_DETAIL = errorDetail };
@@ -176,7 +179,7 @@ namespace TheDataResourceExporter.Utils
                     else
                     {
                         var targetsAttrValue = from attr in targetsAttr
-                                               where null != attr && null != attr.Value 
+                                               where null != attr && null != attr.Value
                                                select attr.Value;
                         value = string.Join(";;", targetsAttrValue.ToArray());
                     }
@@ -309,7 +312,7 @@ namespace TheDataResourceExporter.Utils
 
         public static DateTime? pareseDateTimeExactUseCurrentCultureInfo(string dataStr, string format = "yyyyMMdd")
         {
-            if(!string.IsNullOrEmpty(dataStr))
+            if (!string.IsNullOrEmpty(dataStr))
             {
                 dataStr = dataStr.Trim();
             }

@@ -76,7 +76,7 @@ namespace TheDataResourceExporter
                     {
                         var message = $"{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}文件夹路径不正确";
                         MessageUtil.DoAppendTBDetail(message);
-                        LogHelper.WriteImportErrorLog(message);
+                        LogHelper.WriteExportErrorLog(message);
                         return true;
                     }
 
@@ -98,7 +98,7 @@ namespace TheDataResourceExporter
                     if (allFoundFilePaths.Count() == 0)
                     {
                         MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
-                        LogHelper.WriteImportErrorLog("没有找到指定的文件");
+                        LogHelper.WriteExportErrorLog("没有找到指定的文件");
 
 
                         MessageUtil.showMessageBoxWithErrorLog($"指定的路径不正确{dirPath}，请选择正确的路径！");
@@ -152,7 +152,7 @@ namespace TheDataResourceExporter
 
                             var errorMsg = $"导出文件{currentFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}";
                             MessageUtil.DoSetTBDetail($"发生异常:{errorMsg}");
-                            LogHelper.WriteImportErrorLog(errorMsg);
+                            LogHelper.WriteExportErrorLog(errorMsg);
                             errorMessageTopScope += errorMsg;
                             continue;
                         }
@@ -176,7 +176,7 @@ namespace TheDataResourceExporter
             {
                 var errorMsg = $"{Environment.NewLine}错误信息{ex.Message}：{ex.StackTrace}";
                 MessageUtil.DoSetTBDetail($"发生异常:{errorMsg}");
-                LogHelper.WriteImportErrorLog(errorMsg);
+                LogHelper.WriteExportErrorLog(errorMsg);
                 errorMessageTopScope += errorMsg;
                 MessageBox.Show(errorMessageTopScope);
             }
@@ -260,7 +260,7 @@ namespace TheDataResourceExporter
 
                 //找寻需要解析的文件并保存到用户指定的位置
 
-                saveRetrivedFilesInArchive(storagePaths, retrievedFileSavePath, allRelativePaths);
+                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths);
 
 
             }
@@ -301,38 +301,170 @@ namespace TheDataResourceExporter
         /// <param name="storagePaths"></param>
         /// <param name="retrievedFileSavePath"></param>
         /// <param name="allRelativePaths"></param>
-        private static void saveRetrivedFilesInArchive(String[] storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
+        private static void saveRetrivedFilesInArchive(List<String> storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
         {
-
+            bool ignoreFileNotFoundError = false;
             foreach (var relativePathWithArchiveInnerPath in allRelativePaths)
             {
-                bool canFileFile = false;
-
-               var zipFileFullNameLength = relativePathWithArchiveInnerPath.IndexOf(".zip") + 5;
-               var zipFileFullName = relativePathWithArchiveInnerPath.Substring(0, zipFileFullNameLength);
-
-               
-
-
-
-
-
-                if (!canFileFile) //没有找到文件
+                var index = relativePathWithArchiveInnerPath.IndexOf(".zip");
+                if (-1 == index)
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有找到指定的文件，");
+                    index = relativePathWithArchiveInnerPath.IndexOf(".ZIP");
                 }
+                if (-1 == index)
+                {
+                    LogHelper.WriteExportErrorLog($"相对路径{relativePathWithArchiveInnerPath}错误");
+                    continue;
+                }
+
+                var zipFileFullNameLength = index + 4;
+
+                //zip包完整相对路径
+                var zipFileRelativeFullName = relativePathWithArchiveInnerPath.Substring(0, zipFileFullNameLength);
+
+                //压缩包内路径
+                var achiveInnerPath = relativePathWithArchiveInnerPath.Substring(zipFileFullNameLength);
+
+                List<String> absoluteZipFilesPaths = new List<string>();
+                //相对路径就是绝对路径 处理样例那种路径长度不够的情况
+                if (File.Exists(zipFileRelativeFullName))
+                {
+                    absoluteZipFilesPaths.Add(zipFileRelativeFullName);
+                }
+
+                foreach (var storagePath in storagePaths)
+                {
+                    string absoluteZipFullPath = getProperZipAbsPath(storagePath, zipFileRelativeFullName);
+                    //获取的绝对路径能找到zip文件
+                    if (File.Exists(absoluteZipFullPath))
+                    {
+                        absoluteZipFilesPaths.Add(absoluteZipFullPath);
+                    }
+                }
+
+                if (0 == absoluteZipFilesPaths.Count())//没有找到匹配的文件
+                {
+                    string message = "没有找到可提取的文件，请检查文件存储位置和文件相对路径组合后的绝对文件路径是否正确!";
+
+                    message = message + Environment.NewLine + "选择终止(Abort)终止程序运行，重试（Retry）继续寻找下一个文件，找不到要提取的文件继续弹框,忽略(Ignore)如果依然提取不到文件，不再弹出此对话框";
+                    message = message + Environment.NewLine + "当前待提取文件相对路径：" + achiveInnerPath;
+                    message = message + Environment.NewLine + "您提供的存储路径：" + string.Join(Environment.NewLine, storagePaths);
+
+                    LogHelper.WriteExportErrorLog(message);
+
+                    if (!ignoreFileNotFoundError)
+                    {
+                        var result = MessageBox.Show(message, "没找到文件", MessageBoxButtons.AbortRetryIgnore);
+                        if (result == DialogResult.Retry)
+                        {
+                            continue;
+                        }
+                        if (result == DialogResult.Ignore)//如果选择忽略
+                        {
+                            ignoreFileNotFoundError = true;
+                        }
+                        if (result == DialogResult.Abort)//如果选择放弃 终止程序运行
+                        {
+                            return;
+                        }
+                    }
+                }
+
+
+                //如果找到多个文件，只取第一个文件
+                var firstAbsoluteZipFullPath = absoluteZipFilesPaths.First();
+                achiveInnerPath = ensureNotStartWithBackSlash(achiveInnerPath);
+                String zipFileName = firstAbsoluteZipFullPath.Split("\\".ToArray()).Last();
+
+                retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
+
+                Directory.CreateDirectory(retrievedFileSavePath);
+
+                String fullSavePath = "";
+                if (Regex.IsMatch(relativePathWithArchiveInnerPath, "[A-Za-z]+:\\.*"))
+                {
+                    fullSavePath = retrievedFileSavePath + "\\" + zipFileName + "\\" + achiveInnerPath;
+                }
+                else
+                {
+                    fullSavePath = retrievedFileSavePath + "\\" + relativePathWithArchiveInnerPath;
+                }
+
+
+                retriveAndSaveFile(firstAbsoluteZipFullPath, fullSavePath, achiveInnerPath);
             }
+        }
 
+        /// <summary>
+        /// 保存文件
+        /// </summary>
+        /// <param name="absoluteFullRetrivePath"></param>
+        /// <param name="absoluteFullSavePath"></param>
+        /// <param name="achiveInnerPath"></param>
+        private static void retriveAndSaveFile(String absoluteFullRetrivePath, String absoluteFullSavePath, String achiveInnerPath)
+        {
+            FileInfo retrivedFile = new FileInfo(absoluteFullRetrivePath);
 
+            using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(absoluteFullRetrivePath))
+            {
+                var targetArchiveEntry = CompressUtil.getEntryByKey(archive, achiveInnerPath);
+                FileInfo targetFileInfo = new FileInfo(absoluteFullSavePath);
+                Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                //targetFileInfo.Create();
+                targetArchiveEntry.WriteToFile(absoluteFullSavePath);
+            }
+        }
 
+        /// <summary>
+        /// 确保路径不以反斜杠结尾
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private static string ensureNotEndWithBackSlash(String path)
+        {
+            path = CompressUtil.ensureUseBackSlash(path);
+            if (path.EndsWith("\\"))
+            {
+                path = path.Substring(0, path.Length - 1);
+            }
+            return path;
+        }
 
+        /// <summary>
+        /// 确保路径不以反斜杠开头
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private static String ensureNotStartWithBackSlash(String path)
+        {
+            path = CompressUtil.ensureUseBackSlash(path);
+            if (path.StartsWith("\\"))
+            {
+                path = path.Substring(1);
+            }
+            return path;
+        }
 
-
-
-
+        /// <summary>
+        /// 获取压缩包绝对路径
+        /// </summary>
+        /// <param name="storagePath"></param>
+        /// <param name="zipFileFullName"></param>
+        /// <returns></returns>
+        private static String getProperZipAbsPath(String storagePath, String zipFileFullName)
+        {
+            storagePath = ensureNotEndWithBackSlash(storagePath);
+            zipFileFullName = ensureNotStartWithBackSlash(zipFileFullName);
+            return storagePath + "\\" + zipFileFullName;
         }
 
 
+
+        /// <summary>
+        /// 解析号单
+        /// </summary>
+        /// <param name="fileHaoDanPath"></param>
+        /// <returns></returns>
         private static List<String> parseHaoDanFile(string fileHaoDanPath)
         {
             try

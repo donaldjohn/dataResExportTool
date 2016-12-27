@@ -189,7 +189,7 @@ namespace TheDataResourceExporter
             }
             catch (Exception e)
             {
-                LogHelper.WriteImportLog("", "", SQL + "\r\n" + e.Message);
+                LogHelper.WriteExportLog("", "", SQL + "\r\n" + e.Message);
                 return null;
             }
 

@@ -18,7 +18,7 @@ namespace TheDataResourceExporter.Utils
         /// <param name="dest"></param>
         /// <param name="txtName"></param>
         /// <param name="text"></param>
-        public static void WriteImportLog(string dest, string txtName, string text)
+        public static void WriteExportLog(string dest, string txtName, string text)
         {
 
             string dateStr = ExportManger.bathStartTime.ToString("[yyyy年MM月dd日 HH：mm：ss FF]");
@@ -54,14 +54,14 @@ namespace TheDataResourceExporter.Utils
         }
 
 
-        public static void WriteImportLog(string msg)
+        public static void WriteExportLog(string msg)
         {
             string logDir = ConfigurationManager.AppSettings["logDir"];
-            WriteImportLog(logDir, "Import_Info", msg);
+            WriteExportLog(logDir, "Import_Info", msg);
         }
 
 
-        public static void WriteImportErrorLog(string msg)
+        public static void WriteExportErrorLog(string msg)
         {
             //添加时间标识
             //DateTime now = System.DateTime.Now;
@@ -70,7 +70,7 @@ namespace TheDataResourceExporter.Utils
             {
                 lock (typeof(LogHelper))
                 {
-                    WriteImportLog(logDir, "Export_Error", msg);
+                    WriteExportLog(logDir, "Export_Error", msg);
                 }
             });
             task.Start();

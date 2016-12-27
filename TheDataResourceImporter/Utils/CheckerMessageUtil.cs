@@ -48,7 +48,7 @@ namespace TheDataResourceExporter.Utils
             //异步更新
             //appendTbDetail?.BeginInvoke(msg, null, null);
 
-            LogHelper.WriteImportLog(msg);
+            LogHelper.WriteExportLog(msg);
 
             appendTbDetail?.Invoke(msg);
         }

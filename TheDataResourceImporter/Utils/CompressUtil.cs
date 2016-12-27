@@ -36,14 +36,14 @@ namespace TheDataResourceExporter.Utils
                 {
                     string msg = "!!!!!!!!!!发生异常, 但是文件解压成功：" + ex.Message + ex.StackTrace;
                     MessageUtil.DoAppendTBDetail(msg);
-                    LogHelper.WriteImportErrorLog(msg);
+                    LogHelper.WriteExportErrorLog(msg);
                     successed = true;
                 }
                 else
                 {
                     string msg = "!!!!!!!!!!发生异常, 解压失败：" + ex.Message + ex.StackTrace;
                     MessageUtil.DoAppendTBDetail(msg);
-                    LogHelper.WriteImportErrorLog(msg);
+                    LogHelper.WriteExportErrorLog(msg);
                     successed = false;   
                 }
             }
@@ -144,8 +144,11 @@ namespace TheDataResourceExporter.Utils
 
         }
 
-        //压缩包内目录类型 移除多余的/, 统一使用\\做分隔符
-        
+        /// <summary>
+        /// 压缩包内目录类型 移除多余的/, 统一使用\\做分隔符
+        /// </summary>
+        /// <param name="entryKey"></param>
+        /// <returns></returns>
         public static string ensureUseBackSlash(string entryKey)
         {
             if (entryKey.EndsWith("/"))

@@ -55,6 +55,7 @@ namespace TheDataResourceExporter.Utils
         public static void showMessageBoxWithErrorLog(string message)
         {
             MessageUtil.DoSetTBDetail(message);
+            LogHelper.WriteExportErrorLog(message);
             MessageBox.Show(message);
         }
     }

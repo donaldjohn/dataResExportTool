@@ -37,7 +37,7 @@ namespace TheDataResourceExporter.Utils
             }
             try
             {
-                dest = dest + Path.DirectorySeparatorChar + dateStr + "-" + txtName + ".log";
+                dest = $"{dest}{Path.DirectorySeparatorChar}{dateStr}-{txtName}-[{ExportManger.currentHDFile}]-[{ExportManger.bathId}].log";
                 using (StreamWriter sw = new StreamWriter(dest, true, Encoding.Default))
                 {
                     DateTime current = System.DateTime.Now;

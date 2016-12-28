@@ -28,35 +28,24 @@ namespace TheDataResourceExporter
 {
     public class ExportManger
     {
-        public static string currentFile = "";
-        //totalCount, handledCount, handledXMLCount, handledDirCount
-        public static int totalCount = 0;
-        public static int handledCount = 0;
-        public static int handledXMLCount = 0;
-        public static int withExceptionButExtracted = 0;
-        public static int withExcepthonAndFiled2Exracted = 0;
+        public static string currentHDFile = "";
         public static int fileCount = 0;
-        public static DateTime importStartTime = System.DateTime.Now;
         public static DateTime bathStartTime = System.DateTime.Now;
         public static bool forcedStop = false;
 
-        public static string bathId = "";
-
+        public static string bathId = System.Guid.NewGuid().ToString();
         public static string errorMessageTopScope = "";
-
+        public static DateTime exportStartTime = System.DateTime.Now;
 
         public static int dealCount = 0;
         public static int lostCount = 0;
 
         public static void resetCounter()
         {
-            currentFile = "";
-            totalCount = 0;
-            handledCount = 0;
-            withExceptionButExtracted = 0;
-            withExcepthonAndFiled2Exracted = 0;
+            currentHDFile = "";
             fileCount = 0;
-            ExportManger.importStartTime = System.DateTime.Now;
+
+            ExportManger.exportStartTime = System.DateTime.Now;
             //清空进度信息
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
         }
@@ -123,6 +112,8 @@ namespace TheDataResourceExporter
                     dataSourceEntites.Configuration.AutoDetectChangesEnabled = false;
                     dataSourceEntites.Configuration.ProxyCreationEnabled = false;
 
+                    exportStartTime = DateTime.Now;
+
                     foreach (string HDPath in AllHDFilePaths)//遍历处理需要处理的路径
                     {
                         //强制终止
@@ -131,12 +122,12 @@ namespace TheDataResourceExporter
                             MessageUtil.DoAppendTBDetail("强制终止了导出");
                             break;
                         }
-                        currentFile = HDPath.Substring(HDPath.LastIndexOf('\\') + 1);
+                        currentHDFile = HDPath.Substring(HDPath.LastIndexOf('\\') + 1);
                         try
                         {
                             if (File.Exists(HDPath))
                             {
-                                ExportByPath(HDPath, fileType, storagePaths, retrivedFileSavePath, dataSourceEntites);
+                                ExportByHDPath(HDPath, fileType, storagePaths, retrivedFileSavePath, dataSourceEntites);
                             }
                             else
                             {
@@ -150,7 +141,7 @@ namespace TheDataResourceExporter
                                 continue;
                             }
 
-                            var errorMsg = $"导出文件{currentFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}";
+                            var errorMsg = $"处理号单{currentHDFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}";
                             MessageUtil.DoSetTBDetail($"发生异常:{errorMsg}");
                             LogHelper.WriteExportErrorLog(errorMsg);
                             errorMessageTopScope += errorMsg;
@@ -184,10 +175,8 @@ namespace TheDataResourceExporter
         }
 
 
-        public static bool ExportByPath(string HDPath, string fileType, String[] storagePaths, String retrievedFileSavePath, DataSourceEntities dataSourceEntites)
+        public static bool ExportByHDPath(string HDPath, string fileType, String[] storagePaths, String retrievedFileSavePath, DataSourceEntities dataSourceEntites)
         {
-            currentFile = HDPath;
-
             MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
             MessageUtil.DoAppendTBDetail("当前号单文件：" + HDPath);
 
@@ -213,16 +202,15 @@ namespace TheDataResourceExporter
             if (fileType == "中国商标")
             {
                 haoDanFieldName = "MARK_CN_ID";
-                var whereStr = "";
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var result = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
 
-                if (null == result || 0 == result.Count())
+                if (null == resultRecord || 0 == resultRecord.Count())
                 {
                     MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
                     return true;
@@ -231,7 +219,7 @@ namespace TheDataResourceExporter
                 //获取需要提取的文件的相对路径
                 List<string> allRelativePaths = new List<string>();
 
-                foreach (var entity in result)
+                foreach (var entity in resultRecord)
                 {
                     if (!String.IsNullOrEmpty(entity.PATH_FILE))//忽略为空的路径
                     {
@@ -248,7 +236,8 @@ namespace TheDataResourceExporter
                         allRelativePaths.Add(entity.PATH_JPG_SF);
                     }
                 }
-
+                //剔除可能重复的记录
+                allRelativePaths = allRelativePaths.Distinct().ToList();
 
                 if (0 == allRelativePaths.Count)
                 {
@@ -256,13 +245,11 @@ namespace TheDataResourceExporter
                     return true;
                 }
 
-                MessageUtil.DoSetTBDetail($"找到{result.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
 
                 //找寻需要解析的文件并保存到用户指定的位置
 
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths);
-
-
+                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
             }
 
             return true;
@@ -301,11 +288,14 @@ namespace TheDataResourceExporter
         /// <param name="storagePaths"></param>
         /// <param name="retrievedFileSavePath"></param>
         /// <param name="allRelativePaths"></param>
-        private static void saveRetrivedFilesInArchive(List<String> storagePaths, String retrievedFileSavePath, List<string> allRelativePaths)
+        private static void saveRetrivedFilesInArchive(List<String> storagePaths, String retrievedFileSavePath, List<string> allRelativePaths, String HDPath)
         {
             bool ignoreFileNotFoundError = false;
+            int handledCount = 0;
+            int totalCount = allRelativePaths.Count();
             foreach (var relativePathWithArchiveInnerPath in allRelativePaths)
             {
+                
                 var index = relativePathWithArchiveInnerPath.IndexOf(".zip");
                 if (-1 == index)
                 {
@@ -326,7 +316,7 @@ namespace TheDataResourceExporter
                 var achiveInnerPath = relativePathWithArchiveInnerPath.Substring(zipFileFullNameLength);
 
                 List<String> absoluteZipFilesPaths = new List<string>();
-                //相对路径就是绝对路径 处理样例那种路径长度不够的情况
+                //相对路径就是绝对路径 处理样例路径长度不够的情况
                 if (File.Exists(zipFileRelativeFullName))
                 {
                     absoluteZipFilesPaths.Add(zipFileRelativeFullName);
@@ -370,17 +360,17 @@ namespace TheDataResourceExporter
                     }
                 }
 
-
                 //如果找到多个文件，只取第一个文件
                 var firstAbsoluteZipFullPath = absoluteZipFilesPaths.First();
+
                 achiveInnerPath = ensureNotStartWithBackSlash(achiveInnerPath);
+
                 String zipFileName = firstAbsoluteZipFullPath.Split("\\".ToArray()).Last();
 
                 retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
 
-                Directory.CreateDirectory(retrievedFileSavePath);
-
                 String fullSavePath = "";
+
                 if (Regex.IsMatch(relativePathWithArchiveInnerPath, "[A-Za-z]+:\\.*"))
                 {
                     fullSavePath = retrievedFileSavePath + "\\" + zipFileName + "\\" + achiveInnerPath;
@@ -390,8 +380,14 @@ namespace TheDataResourceExporter
                     fullSavePath = retrievedFileSavePath + "\\" + relativePathWithArchiveInnerPath;
                 }
 
-
                 retriveAndSaveFile(firstAbsoluteZipFullPath, fullSavePath, achiveInnerPath);
+
+                handledCount++;
+
+                //更新进度
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, HDPath);
+
+                System.GC.Collect();
             }
         }
 
@@ -405,14 +401,24 @@ namespace TheDataResourceExporter
         {
             FileInfo retrivedFile = new FileInfo(absoluteFullRetrivePath);
 
-            using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(absoluteFullRetrivePath))
+            try
             {
-                var targetArchiveEntry = CompressUtil.getEntryByKey(archive, achiveInnerPath);
-                FileInfo targetFileInfo = new FileInfo(absoluteFullSavePath);
-                Directory.CreateDirectory(targetFileInfo.Directory.FullName);
-                //targetFileInfo.Create();
-                targetArchiveEntry.WriteToFile(absoluteFullSavePath);
+                using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(absoluteFullRetrivePath))
+                {
+                    var targetArchiveEntry = CompressUtil.getEntryByKey(archive, achiveInnerPath);
+                    FileInfo targetFileInfo = new FileInfo(absoluteFullSavePath);
+                    Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                    targetArchiveEntry.WriteToFile(absoluteFullSavePath);
+                }
             }
+            catch (Exception ex)
+            {
+                //提取文件失败
+                var message = $"提取文件{absoluteFullRetrivePath}失败：{Environment.NewLine}zip包：{absoluteFullRetrivePath}{Environment.NewLine}保存路径：{absoluteFullSavePath}{Environment.NewLine}包内路径：{achiveInnerPath}{Environment.NewLine}错误信息：{ex.Message}{Environment.NewLine}错误详情：{ex.StackTrace}";
+                LogHelper.WriteExportErrorLog(message);
+                MessageUtil.DoSetTBDetail(message);
+            }
+
         }
 
         /// <summary>
@@ -457,8 +463,6 @@ namespace TheDataResourceExporter
             zipFileFullName = ensureNotStartWithBackSlash(zipFileFullName);
             return storagePath + "\\" + zipFileFullName;
         }
-
-
 
         /// <summary>
         /// 解析号单

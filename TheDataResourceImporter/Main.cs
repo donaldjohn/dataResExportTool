@@ -266,7 +266,7 @@ namespace TheDataResourceExporter
 
             Func<string[], string, string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginExport;
 
-            ExportManger.importStartTime = System.DateTime.Now;
+            ExportManger.exportStartTime = System.DateTime.Now;
 
             func.BeginInvoke(filePaths, fileType.Trim(), storagePaths.ToArray(), retrivedFileSavePath,
                 delegate (IAsyncResult ia)
@@ -335,11 +335,11 @@ namespace TheDataResourceExporter
                     importProgressBar.Value = currentPercentage;
 
                     //更新耗时信息
-                    double totalSecCount = System.DateTime.Now.Subtract(ExportManger.importStartTime).TotalSeconds;
+                    double totalSecCount = System.DateTime.Now.Subtract(ExportManger.exportStartTime).TotalSeconds;
 
-                    double averageTime = totalSecCount / ExportManger.handledCount;
+                    double averageTime = totalSecCount / handledCount;
 
-                    double importCountPerSec = ExportManger.handledCount / totalSecCount;
+                    double importCountPerSec = handledCount / totalSecCount;
 
                     labelelapsedTotalTime.Text = totalSecCount.ToString("0.####") + "S";
 

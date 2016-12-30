@@ -320,7 +320,7 @@ namespace TheDataResourceExporter
 
                     labelStatus.Text = status;
 
-                    string progressMsg = $"发现需导出{totalCount}条记录，已导出{handledCount}条，剩余{totalCount - handledCount}天";
+                    string progressMsg = $"发现需导出{totalCount}条记录，已导出{handledCount}条，剩余{totalCount - handledCount}条";
 
                     labelProgressMsg.Text = progressMsg;
 

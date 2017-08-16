@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TheDataResourceImporter
+namespace TheDataResourceExporter
 {
     using System;
     using System.Data.Entity;

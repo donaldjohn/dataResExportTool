@@ -9,7 +9,6 @@ using System.Xml.XPath;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Xml;
-using TheDataResourceImporter;
 using System.Windows.Forms;
 
 namespace TheDataResourceExporter.Utils

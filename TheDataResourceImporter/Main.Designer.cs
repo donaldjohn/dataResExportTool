@@ -53,9 +53,6 @@ namespace TheDataResourceExporter
             this.label5 = new System.Windows.Forms.Label();
             this.labelImportCountPerSec = new System.Windows.Forms.Label();
             this.mainMenu = new System.Windows.Forms.MenuStrip();
-            this.menuShowImportHistory = new System.Windows.Forms.ToolStripMenuItem();
-            this.BathHistoryMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.SessionHistoryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuCheckHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
@@ -365,38 +362,12 @@ namespace TheDataResourceExporter
             // mainMenu
             // 
             this.mainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuShowImportHistory,
             this.menuHelp});
             this.mainMenu.Location = new System.Drawing.Point(0, 0);
             this.mainMenu.Name = "mainMenu";
             this.mainMenu.Size = new System.Drawing.Size(734, 25);
             this.mainMenu.TabIndex = 32;
             this.mainMenu.Text = "menuStrip1";
-            // 
-            // menuShowImportHistory
-            // 
-            this.menuShowImportHistory.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.BathHistoryMenu,
-            this.SessionHistoryMenuItem});
-            this.menuShowImportHistory.Enabled = false;
-            this.menuShowImportHistory.Name = "menuShowImportHistory";
-            this.menuShowImportHistory.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
-            this.menuShowImportHistory.Size = new System.Drawing.Size(68, 21);
-            this.menuShowImportHistory.Text = "导出历史";
-            // 
-            // BathHistoryMenu
-            // 
-            this.BathHistoryMenu.Name = "BathHistoryMenu";
-            this.BathHistoryMenu.Size = new System.Drawing.Size(112, 22);
-            this.BathHistoryMenu.Text = "按批次";
-            this.BathHistoryMenu.Click += new System.EventHandler(this.BathHistoryMenu_Click);
-            // 
-            // SessionHistoryMenuItem
-            // 
-            this.SessionHistoryMenuItem.Name = "SessionHistoryMenuItem";
-            this.SessionHistoryMenuItem.Size = new System.Drawing.Size(112, 22);
-            this.SessionHistoryMenuItem.Text = "按文件";
-            this.SessionHistoryMenuItem.Click += new System.EventHandler(this.menuShowImportHistory_Click);
             // 
             // menuHelp
             // 
@@ -411,13 +382,13 @@ namespace TheDataResourceExporter
             // 
             this.menuCheckHelp.Enabled = false;
             this.menuCheckHelp.Name = "menuCheckHelp";
-            this.menuCheckHelp.Size = new System.Drawing.Size(124, 22);
+            this.menuCheckHelp.Size = new System.Drawing.Size(152, 22);
             this.menuCheckHelp.Text = "查看帮助";
             // 
             // menuAbout
             // 
             this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(124, 22);
+            this.menuAbout.Size = new System.Drawing.Size(152, 22);
             this.menuAbout.Text = "关于";
             this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
             // 
@@ -699,9 +670,6 @@ namespace TheDataResourceExporter
         private System.Windows.Forms.ToolStripMenuItem menuCheckHelp;
         private System.Windows.Forms.ToolStripMenuItem menuAbout;
         private CheckBox checkBoxIsDir;
-        private ToolStripMenuItem menuShowImportHistory;
-        private ToolStripMenuItem BathHistoryMenu;
-        private ToolStripMenuItem SessionHistoryMenuItem;
         private Button btnGetDataStoragePath;
         private Button btnCSRetvedFileSavePath;
         private TextBox tbRetrievedFileSavePath;

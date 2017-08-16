@@ -8,8 +8,8 @@
     <ProjectGuid>{67EFE846-2F5D-4DBC-87C5-7EF99F9B9175}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TheDataResourceImporter</RootNamespace>
-    <AssemblyName>TheDataResourceImporter</AssemblyName>
+    <RootNamespace>TheDataResourceExporter</RootNamespace>
+    <AssemblyName>TheDataResourceExporter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -59,7 +59,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>\\192.168.3.58\号单提取工具\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <PlatformTarget>x64</PlatformTarget>

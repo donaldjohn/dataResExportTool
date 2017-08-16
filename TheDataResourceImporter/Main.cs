@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using TheDataResourceExporter.Utils;
-using TheDataResourceImporter;
-
 namespace TheDataResourceExporter
 {
     public partial class Main : Form

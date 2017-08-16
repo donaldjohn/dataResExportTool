@@ -18,7 +18,6 @@ using System.Windows.Forms;
 using System.Threading.Tasks.Dataflow;
 using System.Threading;
 using System.Text.RegularExpressions;
-using TheDataResourceImporter;
 using System.Data.Objects;
 using System.Data.EntityClient;
 using System.Data.SqlClient;

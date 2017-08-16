@@ -12,23 +12,18 @@ namespace TheDataResourceImporter
     using System;
     using System.Collections.Generic;
     
-    public partial class S_CHINA_MEDICINE_PATENT_TRANS
+    public partial class S_T_MEDICINE_TRANS_T1
     {
         public string ID { get; set; }
-        public string T1_ETI { get; set; }
         public string T1_AP { get; set; }
         public Nullable<System.DateTime> T1_AD { get; set; }
         public string T1_PN { get; set; }
         public Nullable<System.DateTime> T1_PD { get; set; }
         public string T1_EPA { get; set; }
-        public string T1_EPAC { get; set; }
-        public string T1_EADDR { get; set; }
         public string T1_EINR { get; set; }
         public string T1_IC0 { get; set; }
-        public string T1_IC1 { get; set; }
         public string T1_IC2 { get; set; }
         public string T1_EAB { get; set; }
-        public string T1_PHC { get; set; }
         public string T1_EANA { get; set; }
         public string T1_EBIO { get; set; }
         public string T1_EEXT { get; set; }
@@ -42,12 +37,20 @@ namespace TheDataResourceImporter
         public string T1_EDINT { get; set; }
         public string T1_ETOXI { get; set; }
         public string T1_EDIAG { get; set; }
-        public string T2_AP { get; set; }
-        public string T2_EFORMULA { get; set; }
         public string IMPORT_SESSION_ID { get; set; }
         public Nullable<System.DateTime> IMPORT_TIME { get; set; }
-        public string FILE_PATH { get; set; }
         public string ARCHIVE_INNER_PATH { get; set; }
+        public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string T1_ETI { get; set; }
+        public string T1_EPAC { get; set; }
+        public string T1_EADDR { get; set; }
+        public string T1_IC1 { get; set; }
+        public string T1_PHC { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string T1_AD_STR { get; set; }
+        public string T1_PD_STR { get; set; }
     }
 }

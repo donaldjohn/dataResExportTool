@@ -32,5 +32,8 @@ namespace TheDataResourceImporter
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
         public string ID { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
     }
 }

@@ -77,5 +77,10 @@ namespace TheDataResourceImporter
         public string C_PT_NS { get; set; }
         public string C_PL_NS { get; set; }
         public string C_TR_NS { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string C_STARTDATE_STR { get; set; }
+        public string C_VERDICTDATE_STR { get; set; }
     }
 }

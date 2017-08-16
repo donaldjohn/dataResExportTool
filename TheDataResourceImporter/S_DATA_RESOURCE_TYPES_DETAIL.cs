@@ -21,5 +21,8 @@ namespace TheDataResourceImporter
         public string IN_PROCESS { get; set; }
         public string HASCHECKER { get; set; }
         public string HASEXPORTER { get; set; }
+        public string IS_PAT { get; set; }
+        public string INDEX_TYPE { get; set; }
+        public string F_DATA_NUM { get; set; }
     }
 }

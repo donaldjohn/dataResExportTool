@@ -436,28 +436,46 @@ namespace TheDataResourceExporter
 
             var fDataNum = "";
 
-            switch (fileType)
-            {
-                case "中国生物序列深加工数据-中文": fDataNum = "045"; break;
-                case "中国生物序列深加工数据-翻译": fDataNum = "045"; break;
-                case "中国商标": fDataNum = "600"; break;
-                case "马德里商标进入中国": fDataNum = "603"; break;
-                case "美国申请商标": fDataNum = "605"; break;
-                case "美国转让商标": fDataNum = "606"; break;
-                case "美国审判商标": fDataNum = "607"; break;
-                case "社内外知识产权图书题录数据": fDataNum = "608"; break;
-                case "中国法院判例初加工数据": fDataNum = "610"; break;
-                case "马德里商标购买数据": fDataNum = "613"; break;
-                case "中国专利代理知识产权法律法规加工数据": fDataNum = "614"; break;
-                case "中国集成电路布图公告及事务数据": fDataNum = "615"; break;
-                case "中国知识产权海关备案数据": fDataNum = "616"; break;
-                case "中国专利复审（无效）数据": fDataNum = "046"; break;
-                case "中国专利的判决书数据": fDataNum = "506"; break;
-                case "中国中药专利翻译数据": fDataNum = "052"; break;
-            }
+            //switch (fileType)
+            //{
+            //    case "中国商标": fDataNum = "DN0600"; break;//132
+            //    case "马德里商标进入中国": fDataNum = "DN0603"; break;//136
+            //    case "美国申请商标": fDataNum = "DN0605"; break;//138
+            //    case "美国转让商标": fDataNum = "DN0606"; break;//139
+            //    case "社内外知识产权图书题录数据": fDataNum = "DN0608"; break;//147
+            //    case "中国法院判例初加工数据": fDataNum = "DN0610"; break;//162
+            //    case "马德里商标购买数据": fDataNum = "DN0613"; break;//172
+            //    case "中国集成电路布图公告及事务数据": fDataNum = "DN0615"; break;//183
+            //    case "中国知识产权海关备案数据": fDataNum = "DN0616"; break;//184
+            //    case "中国专利代理知识产权法律法规加工数据": fDataNum = "DN0135"; break; //180
+            //    case "中国专利复审数据": fDataNum = "DN0046"; break;//194
+            //    case "中国专利无效数据": fDataNum = "DN0507"; break;//195
+            //    case "中国专利的判决书数据": fDataNum = "DN0506"; break;//196
+            //    case "中国生物序列深加工数据-中文": fDataNum = "DN0045"; break;//209
+            //    case "中国生物序列深加工数据-翻译": fDataNum = "DN0045"; break;//209
+            //    case "中国中药专利翻译数据": fDataNum = "DN0052"; break;//210
+            //    case "中国化学药物专利深加工数据": fDataNum = "DN0044"; break; //211
+            //    // case "美国审判商标": fDataNum = "DN0607"; break;//
+            //}
+
+            //find the fDataNum by data resource type
+
+
+
+
 
             using (DataSourceEntities dataSourceEntities = new DataSourceEntities())
             {
+                var dataRes = dataSourceEntities.S_DATA_RESOURCE_TYPES_DETAIL.Where(Res=> fileType.Equals(Res.CHINESE_NAME)).FirstOrDefault();
+
+                fDataNum = dataRes.F_DATA_NUM;
+
+                if (string.IsNullOrWhiteSpace(fDataNum))
+                {
+                    MessageBox.Show("选择的数据类型没有编目编号，请联系管理员补充编目信息！");
+                    return;
+                }
+
                 getAndSetDataStoragePath(dataSourceEntities, fDataNum.ToString());
             }
 

@@ -47,5 +47,12 @@ namespace TheDataResourceImporter
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
         public string REEXAMINE_INVALID { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string CN_DECISION_DATE_STR { get; set; }
+        public string APPLICATION_DATE_STR { get; set; }
+        public string PUBLICATION_DATE_STR { get; set; }
+        public string PUBLICATION_INFO_DATE_STR { get; set; }
     }
 }

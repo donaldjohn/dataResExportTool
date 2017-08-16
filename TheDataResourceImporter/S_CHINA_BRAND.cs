@@ -44,5 +44,14 @@ namespace TheDataResourceImporter
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
         public string TRADEMARK_NOTICE_STATUS { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string DATEINFO_APPLICATION_DATE_STR { get; set; }
+        public string DATEINFO_REG_DATE_STR { get; set; }
+        public string SPECIAL_RIGHT_STARTDATE_STR { get; set; }
+        public string SPECIAL_RIGHT_ENDDATE_STR { get; set; }
+        public string DATEINFO_PRI_RIGHT_DATE { get; set; }
+        public string DATEINFO_PRI_RIGHT_DATE_STR { get; set; }
     }
 }

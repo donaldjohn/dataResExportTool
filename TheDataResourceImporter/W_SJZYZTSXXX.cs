@@ -64,5 +64,6 @@ namespace TheDataResourceImporter
         public string F_CATALOGUER { get; set; }
         public string F_CATALOGUERID { get; set; }
         public string F_STSJNAME { get; set; }
+        public string F_DATASAMPLE { get; set; }
     }
 }

@@ -35,5 +35,11 @@ namespace TheDataResourceImporter
         public string ASSIGNOR_PERSON_NAME { get; set; }
         public string ASSIGNEE_PERSON_NAME { get; set; }
         public string SERIAL_NO { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string VERSION_DATE_STR { get; set; }
+        public string TRANSACTION_DATE_STR { get; set; }
+        public string ASSIGNMENT_DATE_RECORDED_STR { get; set; }
     }
 }

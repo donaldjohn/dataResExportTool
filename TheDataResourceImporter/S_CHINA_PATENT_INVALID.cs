@@ -25,7 +25,7 @@ namespace TheDataResourceImporter
         public string PUBLICATION_NUMBER { get; set; }
         public Nullable<System.DateTime> PUBLICATION_DATE { get; set; }
         public string INVENTION_TITLE { get; set; }
-        public string CLASSIFICATION_LOCARNO { get; set; }
+        public string CLASSIFICATION_IPC { get; set; }
         public string CN_APPELLANT { get; set; }
         public string CN_EXAMINERS { get; set; }
         public string PUBLICATION_INFO_COUNTRY { get; set; }
@@ -45,5 +45,12 @@ namespace TheDataResourceImporter
         public string ARCHIVE_INNER_PATH { get; set; }
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string CN_DECISION_DATE_STR { get; set; }
+        public string APPLICATION_DATE_STR { get; set; }
+        public string PUBLICATION_DATE_STR { get; set; }
+        public string PUBLICATION_INFO_DATE_STR { get; set; }
     }
 }

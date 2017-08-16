@@ -59,5 +59,18 @@ namespace TheDataResourceImporter
         public string ARCHIVE_INNER_PATH { get; set; }
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string TM_REG_DATE_STR { get; set; }
+        public string TM_EXP_DATE_STR { get; set; }
+        public string PT_FEE_DATE_STR { get; set; }
+        public string PT_APP_DATE_STR { get; set; }
+        public string PT_REG_DATE_STR { get; set; }
+        public string PT_PRIORITY_DATE_STR { get; set; }
+        public string CP_COMPLETE_DATE_STR { get; set; }
+        public string CP_EXP_DATE_STR { get; set; }
+        public string RECORD_BEGIN_DATE_STR { get; set; }
+        public string RECORD_END_DATE_STR { get; set; }
     }
 }

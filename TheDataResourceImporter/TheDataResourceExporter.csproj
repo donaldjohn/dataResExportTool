@@ -63,7 +63,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Release\</OutputPath>
+    <OutputPath>\\192.168.3.58\号单提取工具\Debug\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -144,70 +144,13 @@
     <Compile Include="ImportHistoryForm.Designer.cs">
       <DependentUpon>ImportHistoryForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="IMPORT_ERROR.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="IMPORT_SESSION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AMERICAN_BRAND_GRAPHCLASSIFY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AMERICAN_BRAND_USCLASSIFY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AMERICAN_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AMERICAN_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_AMERICA_APPLY_BRAND.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="S_AMERICA_TRANSFER_BRAND.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_AMERICA_TRIAL_BRAND.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AUSTRALIAN_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_AUSTRIA_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_BELGIAN_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_BIOLOGICAL_SEQ.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_BRITISH_PATENT_FULLTEXTCODE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CANADIAN_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BIOLOGICAL_PROCESS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BOOK.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_CHINA_BRAND.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BRAND_CLASSIFICATION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BRAND_LICENSE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BRAND_TRANSFER.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_BRAND_TRANS_INFO.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="S_CHINA_CIRCUITLAYOUT.cs">
@@ -219,36 +162,6 @@
     <Compile Include="S_CHINA_CUSTOMS_RECORD.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_CHINA_LAWSTATE_INDEXINGLIB.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_LICENSE_PROCESSINFO.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_MEDICINE_PATENT_HANDLE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_MEDICINE_PATENT_TRANS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_ABSTRACTS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_BIBLIOGRAPHIC.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_BIOLOGICALSEQ.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_FEEINFORMATION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_FULLTEXT_PDF.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_GAZETTE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_CHINA_PATENT_INVALID.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
@@ -258,109 +171,13 @@
     <Compile Include="S_CHINA_PATENT_LAWSPROCESS.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_CHINA_PATENT_LAWSTATE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_LAWSTATE_CHANGE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_NOTICES.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_CHINA_PATENT_REVIEW.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_STANDARDFULLTXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_STAND_TEXTIMAGE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_TEXTCODE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PATENT_TEXTIMAGE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_PHARMACEUTICAL_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_STANDARD_SIMPCITATION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_CHINA_WELLKNOWN_BRAND.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="S_COMMUNITY_INTELLECTUALRECORD.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_COMPANY_CODE_LIBRARY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_DATA_RESOURCE_TYPES_DETAIL.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_DOCDB.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_EURASIAN_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_EUROPEAN_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_FOREIGN_PATENT_FULLTEXT_PDF.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_FOREIGN_PATENT_SEQUENCE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_FRENCH_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_FRENCH_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_GERMAN_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_GERMAN_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_GLOBAL_PATENT_CITATION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_HONGKONG_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_IMPORT_BATH.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_ISRAEL_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_JAPAN_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_JAPAN_PATENT_ABSTRACTS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_JAPAN_PATENT_FULLTEXTCODE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_JOURNAL_PROJECT_ABSTRACT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_KOREAN_PATENT_FULLTEXTCODE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_KOREA_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_KOREA_PATENT_ABSTRACTS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_MACAO_PATENT_DESCRIPTION.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="S_MADRID_BRAND_ENTER_CHINA.cs">
@@ -369,79 +186,16 @@
     <Compile Include="S_MADRID_BRAND_PURCHASE.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_PATENT_FAMILY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_PATENT_PAYMENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_POLAND_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_RUSSIAN_DESIGN_PATENT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_RUSSIAN_PATENT_ABSTRACTS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_RUSSIAN_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_SINGAPORE_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_SPANISH_PATENT_FULLTEXT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_STD_JP_CIT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_STD_KR_CIT.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_STD_KR_PRS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_SWISS_PATENT_FULLTEXTCODE.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_TAIWAN_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="S_T_BIOLOGICAL_CN.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_T_BIOLOGICAL_FEATURE_CN.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_T_BIOLOGICAL_FEATURE_FY.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="S_T_BIOLOGICAL_FY.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_T_BIOLOGICAL_INFO_CN.cs">
+    <Compile Include="S_T_MEDICINE_TRANS_T1.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="S_T_BIOLOGICAL_INFO_FY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_T_BIOLOGICAL_PRIORITY_CN.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_T_BIOLOGICAL_PRIORITY_FY.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_WIPO_PATENT_DESCRIPTION.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_WORLD_LEGAL_STATUS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_WORLD_PATENT_LAWSTATUS.cs">
-      <DependentUpon>DataResourceEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="S_ZONE_CODE_BASE.cs">
+    <Compile Include="S_T_PHARMACEUTICAL_T1.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="TheDataResourceExporter.cs" />

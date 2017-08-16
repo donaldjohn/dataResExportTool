@@ -52,5 +52,15 @@ namespace TheDataResourceImporter
         public Nullable<decimal> SESSION_INDEX { get; set; }
         public string TYPE_CODE_GS { get; set; }
         public string TYPE_CODE_DM { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string VERSION_DATE_STR { get; set; }
+        public string TRANSACTION_DATE_STR { get; set; }
+        public string HEADER_FILING_DATE_STR { get; set; }
+        public string HEADER_REGISTRATION_DATE_STR { get; set; }
+        public string HEADER_STATUS_DATE_STR { get; set; }
+        public string HEADER_ABANDONMENT_DATE_STR { get; set; }
+        public string HEADER_CANCELLATION_DATE_STR { get; set; }
     }
 }

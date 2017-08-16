@@ -37,5 +37,13 @@ namespace TheDataResourceImporter
         public string ARCHIVE_INNER_PATH { get; set; }
         public string FILE_PATH { get; set; }
         public Nullable<decimal> SESSION_INDEX { get; set; }
+        public string DOC_FILE_NAME { get; set; }
+        public string BATCH { get; set; }
+        public string DOC_URI { get; set; }
+        public string BTSQR_STR { get; set; }
+        public string GGR_STR { get; set; }
+        public string BTWCR_STR { get; set; }
+        public string BTLYR_STR { get; set; }
+        public string BTQMR_STR { get; set; }
     }
 }

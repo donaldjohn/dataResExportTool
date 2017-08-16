@@ -18,21 +18,21 @@ namespace TheDataResourceExporter.Utils
     {
 
 
-        public static IMPORT_ERROR getImpErrorInstance(string sessionId, string isZip, string zipOrDirPath, string zipPath = "", string errorMessage = "", string errorDetail = "")
-        {
-            var innerImpError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), IGNORED = "N", OCURREDTIME = DateTime.Now, REIMPORTED = "N", ISZIP = isZip, POINTOR = 0, SESSION_ID = sessionId, ZIP_OR_DIR_PATH = zipOrDirPath, ZIP_PATH = zipPath, ERROR_MESSAGE = errorMessage, ERROR_DETAIL = errorDetail };
-            return innerImpError;
-        }
+        //public static IMPORT_ERROR getImpErrorInstance(string sessionId, string isZip, string zipOrDirPath, string zipPath = "", string errorMessage = "", string errorDetail = "")
+        //{
+        //    var innerImpError = new IMPORT_ERROR() { ID = System.Guid.NewGuid().ToString(), IGNORED = "N", OCURREDTIME = DateTime.Now, REIMPORTED = "N", ISZIP = isZip, POINTOR = 0, SESSION_ID = sessionId, ZIP_OR_DIR_PATH = zipOrDirPath, ZIP_PATH = zipPath, ERROR_MESSAGE = errorMessage, ERROR_DETAIL = errorDetail };
+        //    return innerImpError;
+        //}
 
-        public static S_IMPORT_BATH getNewImportBathObject(string fileType)
-        {
-            return new S_IMPORT_BATH() { ID = System.Guid.NewGuid().ToString(), HANDLED_ITEM_COUNT = 0, ISCOMPLETED = "N", IS_DIR_MODE = "N", RES_TYPE = fileType, START_TIME = System.DateTime.Now };
-        }
+        //public static S_IMPORT_BATH getNewImportBathObject(string fileType)
+        //{
+        //    return new S_IMPORT_BATH() { ID = System.Guid.NewGuid().ToString(), HANDLED_ITEM_COUNT = 0, ISCOMPLETED = "N", IS_DIR_MODE = "N", RES_TYPE = fileType, START_TIME = System.DateTime.Now };
+        //}
 
-        public static IMPORT_SESSION getNewImportSession(string fileType, string filePath, S_IMPORT_BATH bath, string IS_ZIP = "Y")
-        {
-            return new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N", BATCH_ID = bath.ID, DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = IS_ZIP };
-        }
+        //public static IMPORT_SESSION getNewImportSession(string fileType, string filePath, S_IMPORT_BATH bath, string IS_ZIP = "Y")
+        //{
+        //    return new IMPORT_SESSION() { SESSION_ID = System.Guid.NewGuid().ToString(), ROLLED_BACK = "N", BATCH_ID = bath.ID, DATA_RES_TYPE = fileType, START_TIME = System.DateTime.Now, ZIP_OR_DIR_PATH = filePath, HAS_ERROR = "N", FAILED_COUNT = 0, COMPLETED = "N", LAST_TIME = 0, ZIP_ENTRIES_COUNT = 0, ZIP_ENTRY_POINTOR = 0, IS_ZIP = IS_ZIP };
+        //}
 
         public static Type getTypeByFullName(string typeFullName)
         {
@@ -56,10 +56,10 @@ namespace TheDataResourceExporter.Utils
          * **/
         public static void exceptionHandler(DataSourceEntities entiesContext, string sessionId, string isZip, string zipOrDirPath, string zipPath = "", string errorMessage = "", string errorDetail = "")
         {
-            var importError = MiscUtil.getImpErrorInstance(sessionId, isZip, zipOrDirPath, zipPath, errorMessage, errorDetail);
-            entiesContext.IMPORT_ERROR.Add(importError);
-            //输出错误信息
-            MessageUtil.DoAppendTBDetail($"{errorMessage}：{errorDetail}");
+            //var importError = MiscUtil.getImpErrorInstance(sessionId, isZip, zipOrDirPath, zipPath, errorMessage, errorDetail);
+            //entiesContext.IMPORT_ERROR.Add(importError);
+            ////输出错误信息
+            //MessageUtil.DoAppendTBDetail($"{errorMessage}：{errorDetail}");
         }
 
 

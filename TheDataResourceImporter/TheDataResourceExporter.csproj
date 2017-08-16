@@ -126,24 +126,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResourceEntities.edmx</DependentUpon>
     </Compile>
-    <Compile Include="ErrorListForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ErrorListForm.Designer.cs">
-      <DependentUpon>ErrorListForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ImportBatchHistoryForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ImportBatchHistoryForm.Designer.cs">
-      <DependentUpon>ImportBatchHistoryForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ImportHistoryForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ImportHistoryForm.Designer.cs">
-      <DependentUpon>ImportHistoryForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="S_AMERICA_APPLY_BRAND.cs">
       <DependentUpon>DataResourceEntities.tt</DependentUpon>
     </Compile>
@@ -226,15 +208,6 @@
     </Compile>
     <EmbeddedResource Include="AboutBoxUS.resx">
       <DependentUpon>AboutBoxUS.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ErrorListForm.resx">
-      <DependentUpon>ErrorListForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ImportBatchHistoryForm.resx">
-      <DependentUpon>ImportBatchHistoryForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ImportHistoryForm.resx">
-      <DependentUpon>ImportHistoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

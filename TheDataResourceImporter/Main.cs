@@ -415,9 +415,9 @@ namespace TheDataResourceExporter
 
         private void menuShowImportHistory_Click(object sender, EventArgs e)
         {
-            var sessionHistoryForm = new ImportHistoryForm();
-            sessionHistoryForm.WindowState = FormWindowState.Maximized;
-            sessionHistoryForm.Show();
+            //var sessionHistoryForm = new ImportHistoryForm();
+            //sessionHistoryForm.WindowState = FormWindowState.Maximized;
+            //sessionHistoryForm.Show();
         }
 
         private void cbFileType_SelectedIndexChanged(object sender, EventArgs e)
@@ -431,6 +431,7 @@ namespace TheDataResourceExporter
             var fileType = cbFileType.SelectedValue.ToString();
             if (string.IsNullOrEmpty(fileType))
             {
+                MessageBox.Show("发生错误：数据类型为空，请重试！");
                 return;
             }
 
@@ -498,9 +499,9 @@ namespace TheDataResourceExporter
 
         private void BathHistoryMenu_Click(object sender, EventArgs e)
         {
-            var bathHistoryForm = new ImportBatchHistoryForm();
-            bathHistoryForm.WindowState = FormWindowState.Maximized;
-            bathHistoryForm.Show();
+            //var bathHistoryForm = new ImportBatchHistoryForm();
+            //bathHistoryForm.WindowState = FormWindowState.Maximized;
+            //bathHistoryForm.Show();
         }
 
         private void tbHDFilePath_TextChanged(object sender, EventArgs e)

@@ -24,5 +24,6 @@ namespace TheDataResourceExporter
         public string IS_PAT { get; set; }
         public string INDEX_TYPE { get; set; }
         public string F_DATA_NUM { get; set; }
+        public string HD_FIELD_NAME { get; set; }
     }
 }

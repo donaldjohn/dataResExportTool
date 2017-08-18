@@ -25,44 +25,59 @@ using System.Data.Entity;
 
 namespace TheDataResourceExporter
 {
-    public class ExportManger
+    public class ExportManager
     {
         public static string currentHDFile = "";
-        public static int fileCount = 0;
-        public static DateTime bathStartTime = System.DateTime.Now;
-        public static bool forcedStop = false;
-
-        public static string bathId = System.Guid.NewGuid().ToString();
-        public static string errorMessageTopScope = "";
         public static DateTime exportStartTime = System.DateTime.Now;
 
-        public static int dealCount = 0;
-        public static int lostCount = 0;
+        public static bool forcedStop = false;
+        public static string contextInfo = "";
+        public static string fileType = "";
+
+
+        public static string errorMessageTopScope = "";
 
         public static void resetCounter()
         {
             currentHDFile = "";
-            fileCount = 0;
-
-            ExportManger.exportStartTime = System.DateTime.Now;
             //清空进度信息
             MessageUtil.DoupdateProgressIndicator(0, 0, 0, 0, "");
         }
 
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="AllHDFilePaths">号单存储位置: 可能是实际的号单路径，也可能是号单所在的文件夹路径（1个）</param>
+        /// <param name="fileType">文件类型</param>
+        /// <param name="storagePaths">提供的存储位置（多个）</param>
+        /// <param name="retrivedFileSavePath">提取文件的保存路径</param>
+        /// <returns></returns>
         public static bool BeginExport(string[] AllHDFilePaths, string fileType, string[] storagePaths, string retrivedFileSavePath)
         {
+            //重置计时
+            exportStartTime = System.DateTime.Now;
+
+            contextInfo = $@"上下文信息：
+                                {Environment.NewLine}指定的号单路径：{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}
+                                {Environment.NewLine}指定的文档类型：{fileType}
+                                {Environment.NewLine}数据存储路径：{MiscUtil.jsonSerilizeObject(storagePaths)}
+                                {Environment.NewLine}指定的号单路径：{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}                                
+                                ";
+
+            ExportManager.fileType = fileType;
+
             try
             {
                 errorMessageTopScope = "";
-                fileCount = AllHDFilePaths.Length;
-
                 MessageUtil.DoAppendTBDetail("开始处理：");
                 #region 文件夹模式 查找文件夹下所有的号单文件
                 if (!Main.showFileDialog)//文件夹模式
                 {
                     if (AllHDFilePaths.Length != 1) //文件夹模式只有一个文件夹路径
                     {
-                        var message = $"{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}文件夹路径不正确";
+                        var message = $"{MiscUtil.jsonSerilizeObject(AllHDFilePaths)}号单文件夹路径不正确!{contextInfo}";
                         MessageUtil.DoAppendTBDetail(message);
                         LogHelper.WriteExportErrorLog(message);
                         return true;
@@ -72,7 +87,7 @@ namespace TheDataResourceExporter
 
                     if (string.IsNullOrEmpty(dirPath) || !Directory.Exists(dirPath))//路径为空, 路径对应的文件夹不存在
                     {
-                        var message = $"文件夹路径{dirPath}不正确";
+                        var message = $"号单文件夹路径{dirPath}不正确!{contextInfo}";
                         MessageUtil.showMessageBoxWithErrorLog(message);
                         return true;
                     }
@@ -85,22 +100,19 @@ namespace TheDataResourceExporter
 
                     if (allFoundFilePaths.Count() == 0)
                     {
-                        MessageBox.Show("没有找到指定的文件，请选择正确的路径！");
-                        LogHelper.WriteExportErrorLog("没有找到指定的文件");
-
-
-                        MessageUtil.showMessageBoxWithErrorLog($"指定的路径不正确{dirPath}，请选择正确的路径！");
+                        var message = $"指定的路径不正确{dirPath}，请选择正确的路径！{contextInfo}";
+                        MessageUtil.showMessageBoxWithErrorLog(message);
                         return true;
                     }
                     else
-                    {
+                    { 
                         MessageUtil.DoAppendTBDetail($"发现{allFoundFilePaths.Count()}个号单文件,它们是{Environment.NewLine + string.Join(Environment.NewLine, allFoundFilePaths)}");
                         AllHDFilePaths = allFoundFilePaths;
                     }
                 }
                 else//文件模式 只允许单选 2016年12月15日15:41:54
                 {
-
+                    //指定的路径即号单路径不需要处理
                 }
                 #endregion
 
@@ -111,17 +123,17 @@ namespace TheDataResourceExporter
                     dataSourceEntites.Configuration.AutoDetectChangesEnabled = false;
                     dataSourceEntites.Configuration.ProxyCreationEnabled = false;
 
-                    exportStartTime = DateTime.Now;
-
                     foreach (string HDPath in AllHDFilePaths)//遍历处理需要处理的路径
                     {
-                        //强制终止
+                        //强制终止 只有导出完当前号单后才会终止
                         if (forcedStop)
                         {
                             MessageUtil.DoAppendTBDetail("强制终止了导出");
                             break;
                         }
+
                         currentHDFile = HDPath.Substring(HDPath.LastIndexOf('\\') + 1);
+
                         try
                         {
                             if (File.Exists(HDPath))
@@ -140,7 +152,7 @@ namespace TheDataResourceExporter
                                 continue;
                             }
 
-                            var errorMsg = $"处理号单{currentHDFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}";
+                            var errorMsg = $"处理号单{currentHDFile}时发生错误{ex.ToString()}，{Environment.NewLine}错误消息:{ex.Message}详细信息{ex.StackTrace}" + $"{Environment.NewLine}当前文件:{HDPath}，{contextInfo}";
                             MessageUtil.DoSetTBDetail($"发生异常:{errorMsg}");
                             LogHelper.WriteExportErrorLog(errorMsg);
                             errorMessageTopScope += errorMsg;
@@ -155,11 +167,11 @@ namespace TheDataResourceExporter
 
                 if (!string.IsNullOrEmpty(errorMessageTopScope))
                 {
-                    MessageBox.Show("导出发生错误：" + errorMessageTopScope);
+                    MessageBox.Show("导出完成，导出发生错误：" + errorMessageTopScope);
                 }
                 else
                 {
-                    MessageUtil.DoAppendTBDetail("导出完成 ");
+                    MessageUtil.DoAppendTBDetail("导出完成，没有错误！");
                 }
             }
             catch (Exception ex)
@@ -173,7 +185,15 @@ namespace TheDataResourceExporter
             return true;
         }
 
-
+        /// <summary>
+        /// 根据号单提取数据
+        /// </summary>
+        /// <param name="HDPath">号单文件路径</param>
+        /// <param name="fileType">数据类型</param>
+        /// <param name="storagePaths">存储路径</param>
+        /// <param name="retrievedFileSavePath">提取文件保存路径</param>
+        /// <param name="dataSourceEntites"></param>
+        /// <returns></returns>
         public static bool ExportByHDPath(string HDPath, string fileType, String[] storagePaths, String retrievedFileSavePath, DataSourceEntities dataSourceEntites)
         {
             MessageUtil.DoAppendTBDetail("您选择的资源类型为：" + fileType);
@@ -183,31 +203,64 @@ namespace TheDataResourceExporter
 
             if (!numFileInfo.Exists)
             {
-                MessageUtil.showMessageBoxWithErrorLog("指定的号单文件有误，号单文件不存在");
+                MessageUtil.showMessageBoxWithErrorLog($"指定的号单文件{HDPath}错误，文件不存在!");
                 return true;
             }
 
-            //数据库字段名
-            var haoDanFieldName = "";
-            var haoDanFieldValues = parseHaoDanFile(HDPath);
 
-            if (null == haoDanFieldValues || 0 == haoDanFieldValues.Count())
+            var parsedResult = parseHaoDanFile(HDPath);
+            //号单解析到的 单值列表
+            var haoDanFieldDistinctValues = parsedResult.Item1;
+            //号单的行数
+            var HDFileLineCount = parsedResult.Item2;
+
+            if (null == haoDanFieldDistinctValues || 0 == haoDanFieldDistinctValues.Count())
             {
-                MessageUtil.showMessageBoxWithErrorLog("指定的号单文件有误，没解析到字段值");
+                MessageUtil.showMessageBoxWithErrorLog($"指定的号单文件{HDPath}有误，没解析到字段值！");
                 return true;
+            }
+
+            var haoDanDistinctValueCount = haoDanFieldDistinctValues.Count();
+
+            //号单有重复值, 或者有空行
+            if (HDFileLineCount != haoDanDistinctValueCount)
+            {
+                LogHelper.WriteExportErrorLog($"WARN：号单文件{HDPath}行数{HDFileLineCount}和实际解析到的号单值数量{haoDanDistinctValueCount}不一致，号单文件中可能有空行或者重复值");
+            }
+
+
+            //获取号单字段 对应数据库字段
+            //数据库字段名
+            var haoDanFieldNameStr = "";
+            string[] haoDanFieldsArray = null;
+            var currentDataResDtl = dataSourceEntites.S_DATA_RESOURCE_TYPES_DETAIL.Where(r => fileType.Equals(r.CHINESE_NAME)).FirstOrDefault();
+
+            if (null != currentDataResDtl)
+            {
+                haoDanFieldNameStr = currentDataResDtl.HD_FIELD_NAME;
+                if (!string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    haoDanFieldsArray = haoDanFieldNameStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                }
             }
 
             #region 132 zip
             if ("中国商标".Equals(fileType))
             {
-                haoDanFieldName = "MARK_CN_ID";
+                if (!string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("请指定");
+                    return true;
+                }
+
+                haoDanFieldNameStr = "MARK_CN_ID";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_BRAND, "S_CHINA_BRAND", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -220,7 +273,6 @@ namespace TheDataResourceExporter
 
                 foreach (var entity in resultRecord)
                 {
-
                     if (!String.IsNullOrEmpty(entity.PATH_FILE))//忽略为空的路径
                     {
                         allRelativePaths.Add(entity.PATH_FILE);
@@ -256,14 +308,14 @@ namespace TheDataResourceExporter
             #region 136 zip
             else if ("马德里商标进入中国".Equals(fileType))
             {
-                haoDanFieldName = "MARK_CN_ID";
+                haoDanFieldNameStr = "MARK_CN_ID";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_ENTER_CHINA, "S_MADRID_BRAND_ENTER_CHINA", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_ENTER_CHINA, "S_MADRID_BRAND_ENTER_CHINA", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -314,14 +366,14 @@ namespace TheDataResourceExporter
             #region 138 zip
             else if ("美国申请商标".Equals(fileType)) //寻找同目录下
             {
-                haoDanFieldName = "SERIAL_NUMBER";
+                haoDanFieldNameStr = "SERIAL_NUMBER";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_AMERICA_APPLY_BRAND, "S_AMERICA_APPLY_BRAND", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_AMERICA_APPLY_BRAND, "S_AMERICA_APPLY_BRAND", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -368,7 +420,7 @@ namespace TheDataResourceExporter
 
                 List<S_AMERICA_TRANSFER_BRAND> entityLst = new List<S_AMERICA_TRANSFER_BRAND>();
 
-                foreach (var entityValue in haoDanFieldValues)
+                foreach (var entityValue in haoDanFieldDistinctValues)
                 {
                     var haoDanValueList = entityValue.Split("\\".ToArray());
                     if (2 == haoDanValueList.Count())
@@ -425,6 +477,7 @@ namespace TheDataResourceExporter
             }
             #endregion
 
+
             #region 140 未入库
             else if ("美国审判商标".Equals(fileType))
             {
@@ -444,14 +497,14 @@ namespace TheDataResourceExporter
             #region 162 zip
             else if ("中国法院判例初加工数据".Equals(fileType))
             {
-                haoDanFieldName = "PN";
+                haoDanFieldNameStr = "PN";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_COURTCASE_PROCESS, "S_CHINA_COURTCASE_PROCESS", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_COURTCASE_PROCESS, "S_CHINA_COURTCASE_PROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -497,14 +550,14 @@ namespace TheDataResourceExporter
             #region 172 zip
             else if ("马德里商标购买数据".Equals(fileType))
             {
-                haoDanFieldName = "INTREGN";
+                haoDanFieldNameStr = "INTREGN";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_PURCHASE, "S_MADRID_BRAND_PURCHASE", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_PURCHASE, "S_MADRID_BRAND_PURCHASE", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -555,14 +608,14 @@ namespace TheDataResourceExporter
             #region 180 zip
             else if ("中国专利代理知识产权法律法规加工数据".Equals(fileType))
             {
-                haoDanFieldName = "LAW_NO";
+                haoDanFieldNameStr = "LAW_NO";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_LAWSPROCESS, "S_CHINA_PATENT_LAWSPROCESS", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_LAWSPROCESS, "S_CHINA_PATENT_LAWSPROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -619,14 +672,14 @@ namespace TheDataResourceExporter
             #region 194 特殊处理 非ZIP  多个记录值
             else if ("中国专利复审（无效）数据".Equals(fileType))
             {
-                haoDanFieldName = "APPLICATION_NUMBER";
+                haoDanFieldNameStr = "APPLICATION_NUMBER";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_REVIEW, "S_CHINA_PATENT_REVIEW", haoDanFieldName, HaoDanFieldValuesWithSingleQuot, true);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_REVIEW, "S_CHINA_PATENT_REVIEW", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot, true);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -684,14 +737,14 @@ namespace TheDataResourceExporter
             #region 196 特殊处理 非Zip 多条记录
             else if ("中国专利的判决书数据".Equals(fileType))
             {
-                haoDanFieldName = "PATENT_APPLICATION_NUMBER";
+                haoDanFieldNameStr = "PATENT_APPLICATION_NUMBER";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_JUDGMENT, "S_CHINA_PATENT_JUDGMENT", haoDanFieldName, HaoDanFieldValuesWithSingleQuot, true);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_JUDGMENT, "S_CHINA_PATENT_JUDGMENT", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot, true);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -752,14 +805,14 @@ namespace TheDataResourceExporter
             else if ("中国生物序列深加工数据-中文".Equals(fileType))
             {
 
-                haoDanFieldName = "CURRENT_APPLICATION_NUMBER";
+                haoDanFieldNameStr = "CURRENT_APPLICATION_NUMBER";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_CN, "S_T_BIOLOGICAL_CN", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_CN, "S_T_BIOLOGICAL_CN", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -803,14 +856,14 @@ namespace TheDataResourceExporter
             #region 209.2 非zip
             else if ("中国生物序列深加工数据-翻译".Equals(fileType))
             {
-                haoDanFieldName = "CURRENT_APPLICATION_NUMBER";
+                haoDanFieldNameStr = "CURRENT_APPLICATION_NUMBER";
                 //处理号单
-                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldValues
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_FY, "S_T_BIOLOGICAL_FY", haoDanFieldName, HaoDanFieldValuesWithSingleQuot);
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_FY, "S_T_BIOLOGICAL_FY", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -850,11 +903,18 @@ namespace TheDataResourceExporter
             }
             #endregion
 
+            #region 210 中国中药专利翻译数据
+            else if ("中国中药专利翻译数据".Equals(fileType))
+            {
+
+            }
+            #endregion
+
             #region 211 mdb 直接根据号单内的AP提取，不需要查库
             else if ("中国化学药物专利深加工数据".Equals(fileType))
             {
                 //找寻需要解析的文件并保存到用户指定的位置
-                List<string> allRelativePaths = (from ap in haoDanFieldValues
+                List<string> allRelativePaths = (from ap in haoDanFieldDistinctValues
                                                  select $"t_abImage(摘要附图)\\{ap}.gif").ToList();
 
                 saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
@@ -864,21 +924,23 @@ namespace TheDataResourceExporter
             return true;
         }
 
-
         /// <summary>
-        /// 查询号单文件中指定的记录
+        /// 根据号单文件查询数据库中对应记录
+        /// 如果数据库有多条记录，默认全部返回
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entiesContext"></param>
-        /// <param name="dbSet"></param>
-        /// <param name="tableName"></param>
-        /// <param name="whereStr"></param>
+        /// <param name="dbSet">要查询的数据库对象</param>
+        /// <param name="tableName">表名</param>
+        /// <param name="fieldName">号单对应的字段名</param>
+        /// <param name="HaoDanFieldValuesLstWithSingleQuotesSurrounded">号单值列表</param>
+        /// <param name="multiRecs">多条匹配是否全部返回</param>
         /// <returns></returns>
-        private static List<TEntity> queryRecords<TEntity>(DataSourceEntities entiesContext, DbSet<TEntity> dbSet, string tableName, string fieldName, List<String> HaoDanFieldValuesLst, bool multiRecs = false) where TEntity : class
+        private static List<TEntity> queryRecords<TEntity>(DataSourceEntities entiesContext, DbSet<TEntity> dbSet, string tableName, string fieldName, List<String> HaoDanFieldValuesLstWithSingleQuotesConclude, bool multiRecs = true) where TEntity : class
         {
             List<TEntity> result = new List<TEntity>();
 
-            foreach (var haoDanFieldValue in HaoDanFieldValuesLst)
+            foreach (var haoDanFieldValue in HaoDanFieldValuesLstWithSingleQuotesConclude)
             {
                 string whereStr = $"where {fieldName} = {haoDanFieldValue}";
                 //查询字段值
@@ -903,6 +965,8 @@ namespace TheDataResourceExporter
             }
             return result;
         }
+
+
 
         /// <summary>
         /// 非压缩包文件的保存
@@ -1213,7 +1277,7 @@ namespace TheDataResourceExporter
         /// </summary>
         /// <param name="fileHaoDanPath"></param>
         /// <returns></returns>
-        private static List<String> parseHaoDanFile(string fileHaoDanPath)
+        private static Tuple<List<String>, int> parseHaoDanFile(string fileHaoDanPath)
         {
             try
             {
@@ -1222,17 +1286,19 @@ namespace TheDataResourceExporter
 
                 var haoDanFieldValues = new List<string>();
 
+                int lineCount = 0;
                 //解析号单字段值
                 while (!sReader.EndOfStream)
-                {
+                {                    
                     var currentLine = sReader.ReadLine();
+                    lineCount++;
                     if (!string.IsNullOrEmpty(currentLine))
                     {
                         haoDanFieldValues.Add(currentLine.Trim());
                     }
                 }
-                //去重
-                return haoDanFieldValues.Distinct().ToList();
+                //返回元组, 去重后的元素 及去重前数量
+                return Tuple.Create(haoDanFieldValues.Distinct().ToList(), lineCount) ;
             }
             catch (Exception ex)
             {

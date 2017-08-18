@@ -93,7 +93,12 @@ namespace TheDataResourceExporter
         }
 
 
-        string[] filePaths = null;
+        string[] HDFilePaths = null;
+        /// <summary>
+        ///获取号单路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_Choose_Click(object sender, EventArgs e)
         {
             if (showFileDialog) //展示文件选择器
@@ -104,11 +109,11 @@ namespace TheDataResourceExporter
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    filePaths = null;
+                    HDFilePaths = null;
 
                     tbHDFilePath.Text = string.Empty;
 
-                    filePaths = new string[] { dialog.FileName };
+                    HDFilePaths = new string[] { dialog.FileName };
 
                     tbHDFilePath.Text = dialog.FileName;
                 }
@@ -127,11 +132,16 @@ namespace TheDataResourceExporter
 
                     tbHDFilePath.Text = foldPath;
 
-                    filePaths = new string[] { foldPath };
+                    HDFilePaths = new string[] { foldPath };
                 }
             }
         }
 
+        /// <summary>
+        /// 选取本地备份1路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCSAddr1_Click(object sender, EventArgs e)
         {
             FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
@@ -147,6 +157,11 @@ namespace TheDataResourceExporter
             }
         }
 
+        /// <summary>
+        /// 选取灾备路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCSRecAddr_Click(object sender, EventArgs e)
         {
             FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
@@ -162,6 +177,11 @@ namespace TheDataResourceExporter
             }
         }
 
+        /// <summary>
+        /// 选取本地备份2路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCSAddr2_Click(object sender, EventArgs e)
         {
             FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
@@ -178,11 +198,16 @@ namespace TheDataResourceExporter
             }
         }
 
+        /// <summary>
+        /// 选择提取文件保存路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnCSRetvedFileSavePath_Click(object sender, EventArgs e)
         {
             FolderBrowserDialogEx folderDialogEx = new FolderBrowserDialogEx();
             folderDialogEx.ShowNewFolderButton = false;
-            folderDialogEx.Description = "请选择文件路径";
+            folderDialogEx.Description = "请选择提取文件保存路径";
             folderDialogEx.RootFolder = Environment.SpecialFolder.MyComputer;//打开我的电脑
 
             if (folderDialogEx.ShowDialog() == DialogResult.OK)
@@ -193,68 +218,91 @@ namespace TheDataResourceExporter
         }
 
 
+        /// <summary>
+        /// 开始提取 事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnStart_Click(object sender, EventArgs e)
         {
 
             //清空进度信息
-            ExportManger.resetCounter();
+            ExportManager.resetCounter();
 
             //清空强制终止标识
-            ExportManger.forcedStop = false;
+            ExportManager.forcedStop = false;
 
             //清空消息
             MessageUtil.setTbDetail("");
 
+
             var fileType = cbFileType.SelectedValue.ToString();
+
 
             //未选中文件类型
             if (String.IsNullOrEmpty(fileType))
             {
-                MessageUtil.showMessageBoxWithErrorLog("请选择数据类型！");
+                MessageBox.Show("请选择数据类型！");
                 return;
             }
 
-            List<String> storagePaths = new List<string>();
+            //数据存储位置
+            List<String> storageServerPaths = new List<string>();
 
             var addrStr1 = tbAddr1.Text;
             if (cbAddr1.Checked && !string.IsNullOrEmpty(addrStr1))
             {
-                storagePaths.AddRange(addrStr1.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+                storageServerPaths.AddRange(addrStr1.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
             }
 
             var addrStr2 = tbAddr2.Text;
             if (cbAddr2.Checked && !string.IsNullOrEmpty(addrStr2))
             {
-                storagePaths.AddRange(addrStr2.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+                storageServerPaths.AddRange(addrStr2.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
             }
 
             var addrRecStr = tbRecAddr.Text;
             if (cbRecAddr.Checked && !string.IsNullOrEmpty(addrRecStr))
             {
-                storagePaths.AddRange(addrRecStr.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
+                storageServerPaths.AddRange(addrRecStr.Split(";".ToArray(), StringSplitOptions.RemoveEmptyEntries));
             }
 
-            if (0 == storagePaths.Count())
+
+            //如果没有指定数据位置, 提示用户是否使用数据库内保存的位置
+            if (0 == storageServerPaths.Count())
             {
                 var message = "请指定至少一个数据位置!";
-                MessageUtil.showMessageBoxWithErrorLog(message);
-                return;
+                MessageBox.Show(message);
+
+                var MBResult = MessageBox.Show("没有指定存储位置，尝试使用数据库保存的路径？", "没有指定数据位置", MessageBoxButtons.YesNo);
+                if (MBResult == DialogResult.No)
+                {
+                    return;
+                }
             }
 
+
+            //号单路径
             var HDFilePath = tbHDFilePath.Text;
 
-            if (string.IsNullOrEmpty(tbHDFilePath.Text) || null == filePaths || filePaths.Length == 0)
+            if (
+                string.IsNullOrEmpty(HDFilePath) //号单文本
+                || 
+                null == HDFilePaths 
+                || 
+                HDFilePaths.Length == 0
+               )
             {
-                MessageUtil.showMessageBoxWithErrorLog("请选择至少选择一个号单文件！");
+                MessageBox.Show("请选择至少选择一个号单文件！");
                 return;
             }
 
-
+            //提取文件保存位置
             var retrivedFileSavePath = tbRetrievedFileSavePath.Text;
 
             if (String.IsNullOrEmpty(retrivedFileSavePath))
             {
-                MessageUtil.showMessageBoxWithErrorLog("请指定提取文件保存位置!");
+                MessageBox.Show("请指定提取文件保存位置!");
             }
             
 
@@ -262,11 +310,11 @@ namespace TheDataResourceExporter
 
             SetEnabled(btnStart, false);
 
-            Func<string[], string, string[], string, bool> func = TheDataResourceExporter.ExportManger.BeginExport;
 
-            ExportManger.exportStartTime = System.DateTime.Now;
 
-            func.BeginInvoke(filePaths, fileType.Trim(), storagePaths.ToArray(), retrivedFileSavePath,
+            Func<string[], string, string[], string, bool> func = TheDataResourceExporter.ExportManager.BeginExport;
+
+            func.BeginInvoke(HDFilePaths, fileType.Trim(), storageServerPaths.ToArray(), retrivedFileSavePath,
                 delegate (IAsyncResult ia)
                 {
                     try
@@ -333,7 +381,7 @@ namespace TheDataResourceExporter
                     importProgressBar.Value = currentPercentage;
 
                     //更新耗时信息
-                    double totalSecCount = System.DateTime.Now.Subtract(ExportManger.exportStartTime).TotalSeconds;
+                    double totalSecCount = System.DateTime.Now.Subtract(ExportManager.exportStartTime).TotalSeconds;
 
                     double averageTime = totalSecCount / handledCount;
 
@@ -397,13 +445,13 @@ namespace TheDataResourceExporter
         private void btnAbort_Click(object sender, EventArgs e)
         {
             //强制终止
-            ExportManger.forcedStop = true;
+            ExportManager.forcedStop = true;
         }
 
         private void buttonReset_Click(object sender, EventArgs e)
         {
             //重置
-            ExportManger.resetCounter();
+            ExportManager.resetCounter();
         }
 
         private void menuAbout_Click(object sender, EventArgs e)
@@ -479,7 +527,7 @@ namespace TheDataResourceExporter
             }
 
             //清空文件路径
-            filePaths = null;
+            HDFilePaths = null;
             tbHDFilePath.Text = "";
         }
 
@@ -502,10 +550,15 @@ namespace TheDataResourceExporter
             //bathHistoryForm.Show();
         }
 
+        /// <summary>
+        ///当文本被修改后，将文本作为号单路径
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void tbHDFilePath_TextChanged(object sender, EventArgs e)
         {
             var inputedpath = tbHDFilePath.Text;
-            filePaths = new string[] { inputedpath };
+            HDFilePaths = new string[] { inputedpath };
         }
 
         private void Main_Load(object sender, EventArgs e)

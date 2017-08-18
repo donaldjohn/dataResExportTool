@@ -21,7 +21,7 @@ namespace TheDataResourceExporter.Utils
         public static void WriteExportLog(string dest, string txtName, string text)
         {
 
-            string dateStr = ExportManger.bathStartTime.ToString("[yyyy年MM月dd日 HH：mm：ss FF]");
+            string dateStr = ExportManager.exportStartTime.ToString("[yyyy年MM月dd日 HH：mm：ss FF]");
 
             if (!Directory.Exists(dest))
             {
@@ -37,7 +37,8 @@ namespace TheDataResourceExporter.Utils
             }
             try
             {
-                dest = $"{dest}{Path.DirectorySeparatorChar}{dateStr}-{txtName}-[{ExportManger.currentHDFile}]-[{ExportManger.bathId}].log";
+                
+                dest = $"{dest}{Path.DirectorySeparatorChar}{dateStr}-{txtName}-[{ExportManager.fileType}].log";
                 using (StreamWriter sw = new StreamWriter(dest, true, Encoding.Default))
                 {
                     DateTime current = System.DateTime.Now;

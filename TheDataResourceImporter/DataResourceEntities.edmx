@@ -524,6 +524,7 @@
           <Property Name="IS_PAT" Type="varchar2" MaxLength="20" />
           <Property Name="INDEX_TYPE" Type="varchar2" MaxLength="100" />
           <Property Name="F_DATA_NUM" Type="varchar2" MaxLength="1000" />
+          <Property Name="HD_FIELD_NAME" Type="varchar2" MaxLength="300" />
         </EntityType>
         <EntityType Name="S_MADRID_BRAND_ENTER_CHINA">
           <Key>
@@ -1610,6 +1611,7 @@
           <Property Name="IS_PAT" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="INDEX_TYPE" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="F_DATA_NUM" Type="String" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="HD_FIELD_NAME" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="W_SJZYZTSXXX">
           <Key>
@@ -2430,6 +2432,7 @@
           <EntitySetMapping Name="S_DATA_RESOURCE_TYPES_DETAIL">
             <EntityTypeMapping TypeName="Model.S_DATA_RESOURCE_TYPES_DETAIL">
               <MappingFragment StoreEntitySet="S_DATA_RESOURCE_TYPES_DETAIL">
+                <ScalarProperty Name="HD_FIELD_NAME" ColumnName="HD_FIELD_NAME" />
                 <ScalarProperty Name="F_DATA_NUM" ColumnName="F_DATA_NUM" />
                 <ScalarProperty Name="INDEX_TYPE" ColumnName="INDEX_TYPE" />
                 <ScalarProperty Name="IS_PAT" ColumnName="IS_PAT" />

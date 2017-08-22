@@ -303,6 +303,7 @@ namespace TheDataResourceExporter
             if (String.IsNullOrEmpty(retrivedFileSavePath))
             {
                 MessageBox.Show("请指定提取文件保存位置!");
+                return;
             }
             
 

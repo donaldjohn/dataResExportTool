@@ -382,13 +382,13 @@ namespace TheDataResourceExporter
             // 
             this.menuCheckHelp.Enabled = false;
             this.menuCheckHelp.Name = "menuCheckHelp";
-            this.menuCheckHelp.Size = new System.Drawing.Size(152, 22);
+            this.menuCheckHelp.Size = new System.Drawing.Size(124, 22);
             this.menuCheckHelp.Text = "查看帮助";
             // 
             // menuAbout
             // 
             this.menuAbout.Name = "menuAbout";
-            this.menuAbout.Size = new System.Drawing.Size(152, 22);
+            this.menuAbout.Size = new System.Drawing.Size(124, 22);
             this.menuAbout.Text = "关于";
             this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
             // 

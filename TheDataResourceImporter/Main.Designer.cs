@@ -630,7 +630,7 @@ namespace TheDataResourceExporter
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenu;
             this.Name = "Main";
-            this.Text = "数据资源导出工具 V0.０.１";
+            this.Text = "数据资源导出工具 V0.5.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
             this.Load += new System.EventHandler(this.Main_Load);
             this.mainMenu.ResumeLayout(false);

@@ -167,11 +167,11 @@ namespace TheDataResourceExporter
 
                 if (!string.IsNullOrEmpty(errorMessageTopScope))
                 {
-                    MessageBox.Show($"导出完成，导出发生错误：{errorMessageTopScope}, 其他详情请查看相关日志!");
+                    MessageBox.Show($"导出完成，导出过程中有如下问题：{errorMessageTopScope}, 其他详情请查看相关日志!");
                 }
                 else
                 {
-                    MessageUtil.DoAppendTBDetail("导出完成, 详情请查看相关日志!");
+                    MessageUtil.DoAppendTBDetail("导出完成！更多信息请查看导出日志");
                 }
             }
             catch (Exception ex)
@@ -208,7 +208,7 @@ namespace TheDataResourceExporter
             }
 
 
-            var parsedResult = parseHaoDanFile(HDPath);
+            var parsedResult = parseHaoDanFileDistinctValuesAndLineCount(HDPath);
             //号单解析到的 单值列表
             var haoDanFieldDistinctValues = parsedResult.Item1;
             //号单的行数
@@ -231,26 +231,23 @@ namespace TheDataResourceExporter
                 LogHelper.WriteExportErrorLog(message);
             }
 
-            MessageUtil.DoSetTBDetail($"从号单中解析到了{haoDanDistinctValueCount}个号单值!");
+            MessageUtil.DoSetTBDetail($"从号单{HDPath}中解析到了{haoDanDistinctValueCount}个号单值!");
 
             //获取号单字段 对应数据库字段
             //数据库字段名
             var haoDanFieldNameStr = "";
-            string[] haoDanFieldsArray = null;
+
             var currentDataResDtl = dataSourceEntites.S_DATA_RESOURCE_TYPES_DETAIL.Where(r => fileType.Equals(r.CHINESE_NAME)).FirstOrDefault();
 
             if (null != currentDataResDtl)
             {
                 haoDanFieldNameStr = currentDataResDtl.HD_FIELD_NAME;
-                if (!string.IsNullOrWhiteSpace(haoDanFieldNameStr))
-                {
-                    haoDanFieldsArray = haoDanFieldNameStr.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                }
             }
 
             #region 132 中国商标 S_CHINA_BRAND zip
             if ("中国商标".Equals(fileType))
             {
+
                 //haoDanFieldNameStr = "MARK_CN_ID";
                 if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
                 {
@@ -274,8 +271,9 @@ namespace TheDataResourceExporter
                 var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
                 if (haoDanValueWithoutRecord.Count() > 0)
                 {
-                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    var message = $"下述号单{HDPath}没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
 
+                    errorMessageTopScope += message;
                     MessageUtil.DoSetTBDetail(message);
 
                     LogHelper.WriteExportErrorLog(message);
@@ -285,11 +283,12 @@ namespace TheDataResourceExporter
                
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    var message = $"没有查询到记录，请核实号单号单{HDPath}内容是否正确!";
+                    MessageUtil.showMessageBoxWithErrorLog(message);
                     return true;
                 }
 
-                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
+                MessageUtil.DoSetTBDetail($"根据您提供的号单{HDPath}，查询到了{resultRecord.Count}条相关记录!");
 
 
                 //寻找文件逻辑:
@@ -331,13 +330,22 @@ namespace TheDataResourceExporter
                     if (0 == zipAbsPathIEnum.Count())
                     {
                         zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
-                        if (String.IsNullOrWhiteSpace(zipAbsPath) || !File.Exists(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
                         {
-                            LogHelper.WriteExportErrorLog($"没有找到可提取zip文件，提取失败。您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!");
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
                             continue; //继续处理下一条记录
                         }
 
-                        var message = $"将使用数据库保存路径尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+                        var message = $"将使用数据库保存路径{zipAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
 
                         LogHelper.WriteExportErrorLog(message);
                         MessageUtil.DoSetTBDetail(message);
@@ -370,7 +378,9 @@ namespace TheDataResourceExporter
 
                     if (0 == allArchiveInnerPathOfCurrentArchive.Count())
                     {
-                        LogHelper.WriteExportErrorLog($"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。");
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
                         continue;
                     }
 
@@ -397,8 +407,8 @@ namespace TheDataResourceExporter
                             {
                                 var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
 
+                                errorMessageTopScope += message;
                                 MessageUtil.DoSetTBDetail(message);
-
                                 LogHelper.WriteExportErrorLog(message);
                             }
                             else //能够找到对应的条目
@@ -432,7 +442,9 @@ namespace TheDataResourceExporter
                                 {
                                     var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
 
-                                    throw new Exception(message, ex.InnerException);
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
                                 }
                             }
                         }
@@ -470,9 +482,8 @@ namespace TheDataResourceExporter
                 if (haoDanValueWithoutRecord.Count() > 0)
                 {
                     var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
-
+                    errorMessageTopScope += message;
                     MessageUtil.DoSetTBDetail(message);
-
                     LogHelper.WriteExportErrorLog(message);
                 }
 
@@ -480,7 +491,10 @@ namespace TheDataResourceExporter
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    var message = $"号单文件{HDPath}里没有查询到记录，请核实号单内容!";
+
+                    errorMessageTopScope += message;
+                    MessageUtil.showMessageBoxWithErrorLog(message);
                     return true;
                 }
 
@@ -499,8 +513,6 @@ namespace TheDataResourceExporter
                 foreach (var entity in resultRecord)
                 {
                     //获取数据库内XML文件的相对路径
-                    var docRelativePath = entity.PATH_FILE;
-
                     var xmlFilePath = entity.PATH_FILE;
 
                     //获取压缩包相对路径
@@ -526,13 +538,23 @@ namespace TheDataResourceExporter
                     if (0 == zipAbsPathIEnum.Count())
                     {
                         zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
-                        if (String.IsNullOrWhiteSpace(zipAbsPath) || !File.Exists(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
                         {
-                            LogHelper.WriteExportErrorLog($"没有找到可提取zip文件，提取失败。您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!");
+
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if(!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
                             continue; //继续处理下一条记录
                         }
 
-                        var message = $"将使用数据库保存路径尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+                        var message = $"将使用数据库保存路径{zipAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
 
                         LogHelper.WriteExportErrorLog(message);
                         MessageUtil.DoSetTBDetail(message);
@@ -565,7 +587,9 @@ namespace TheDataResourceExporter
 
                     if (0 == allArchiveInnerPathOfCurrentArchive.Count())
                     {
-                        LogHelper.WriteExportErrorLog($"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。");
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
                         continue;
                     }
 
@@ -591,9 +615,8 @@ namespace TheDataResourceExporter
                             if (null == foundEntry)
                             {
                                 var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
-
+                                errorMessageTopScope += message;
                                 MessageUtil.DoSetTBDetail(message);
-
                                 LogHelper.WriteExportErrorLog(message);
                             }
                             else //能够找到对应的条目
@@ -622,12 +645,14 @@ namespace TheDataResourceExporter
                                     Directory.CreateDirectory(targetFileInfo.Directory.FullName);
                                     //将文件写到指定的目录
                                     foundEntry.WriteToDirectory(targetFileInfo.Directory.FullName);
+                                    MessageUtil.DoSetTBDetail($"文件{targetFileInfo.FullName}提取成功!");
                                 }
                                 catch (Exception ex)
                                 {
                                     var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
-
-                                    throw new Exception(message, ex.InnerException);
+                                        errorMessageTopScope += message;
+                                        MessageUtil.DoSetTBDetail(message);
+                                        LogHelper.WriteExportErrorLog(message);
                                 }
                             }
                         }
@@ -707,9 +732,8 @@ namespace TheDataResourceExporter
                 if (haoDanValueWithoutRecord.Count() > 0)
                 {
                     var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
-
+                    errorMessageTopScope += message;
                     MessageUtil.DoSetTBDetail(message);
-
                     LogHelper.WriteExportErrorLog(message);
                 }
 
@@ -717,7 +741,8 @@ namespace TheDataResourceExporter
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    var message = $"没有查询到记录，请核实号单{HDPath}内容!";
+                    MessageUtil.showMessageBoxWithErrorLog(message);
                     return true;
                 }
 
@@ -763,9 +788,18 @@ namespace TheDataResourceExporter
                     if (0 == zipAbsPathIEnum.Count())
                     {
                         zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
-                        if (String.IsNullOrWhiteSpace(zipAbsPath) || !File.Exists(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
                         {
-                            LogHelper.WriteExportErrorLog($"没有找到可提取zip文件，提取失败。您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!");
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
                             continue; //继续处理下一条记录
                         }
 
@@ -784,24 +818,24 @@ namespace TheDataResourceExporter
                     List<String> allArchiveInnerPathOfCurrentArchive = new List<string>();
 
 
-                    //if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
-                    //{
-                    //    allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
-                    //    if (!string.IsNullOrWhiteSpace(entity.PATH_JPG))
-                    //    {
-                    //        allArchiveInnerPathOfCurrentArchive.Add(entity.PATH_JPG.Substring(entity.PATH_JPG.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4));
-                    //    }
 
-                    //    if (!string.IsNullOrWhiteSpace(entity.PATH_JPG_SF))
-                    //    {
-                    //        allArchiveInnerPathOfCurrentArchive.Add(entity.PATH_JPG_SF.Substring(entity.PATH_JPG.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4));
-                    //    }
-                    //}
+                    if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
+                    {
+                        allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
+                        
+                        var innerPathWithoutExtention = entity.ARCHIVE_INNER_PATH.Substring(entity.ARCHIVE_INNER_PATH.LastIndexOf("."));
+                        //提取图像和缩略图
+                        allArchiveInnerPathOfCurrentArchive.Add(innerPathWithoutExtention + ".GIF");
+                        allArchiveInnerPathOfCurrentArchive.Add(innerPathWithoutExtention + ".JPG");
+                    }
+
 
 
                     if (0 == allArchiveInnerPathOfCurrentArchive.Count())
                     {
-                        LogHelper.WriteExportErrorLog($"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。");
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
                         continue;
                     }
 
@@ -860,8 +894,9 @@ namespace TheDataResourceExporter
                                 catch (Exception ex)
                                 {
                                     var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
-
-                                    throw new Exception(message, ex.InnerException);
+                                        errorMessageTopScope += message;
+                                        MessageUtil.DoSetTBDetail(message);
+                                        LogHelper.WriteExportErrorLog(message);
                                 }
                             }
                         }
@@ -881,64 +916,292 @@ namespace TheDataResourceExporter
                 //var haoDanFieldName1 = "ASSIGNMENT_REEL_NO";
                 //var haoDanFieldName2 = "ASSIGNMENT_FRAME_NO";
 
+                //MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
+
+                //List<S_AMERICA_TRANSFER_BRAND> entityLst = new List<S_AMERICA_TRANSFER_BRAND>();
+
+                //foreach (var entityValue in haoDanFieldDistinctValues)
+                //{
+                //    var haoDanValueList = entityValue.Split("\\".ToArray());
+                //    if (2 == haoDanValueList.Count())
+                //    {
+                //        var ASSIGNMENT_REEL_NO = haoDanValueList[0];
+                //        var ASSIGNMENT_FRAME_NO = haoDanValueList[1];
+                //        var resultRecord = (from entity in dataSourceEntites.S_AMERICA_TRANSFER_BRAND
+                //                            where ASSIGNMENT_REEL_NO == entity.ASSIGNMENT_REEL_NO && ASSIGNMENT_FRAME_NO == entity.ASSIGNMENT_FRAME_NO
+                //                            select entity).FirstOrDefault();
+
+                //        if (null != resultRecord)
+                //        {
+                //            entityLst.Add(resultRecord);
+                //        }
+                //    }
+                //}
+
+                //if (null == entityLst || 0 == entityLst.Count())
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                //    return true;
+                //}
+
+                ////获取需要提取的文件的相对路径
+                //List<string> allRelativePaths = new List<string>();
+
+                //foreach (var entity in entityLst)
+                //{
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_XML))//XML路径
+                //    {
+                //        allRelativePaths.Add(entity.PATH_XML);
+                //    }
+                //}
+                ////剔除可能重复的记录
+                //allRelativePaths = allRelativePaths.Distinct().ToList();
+
+                //if (0 == allRelativePaths.Count)
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                //    return true;
+                //}
+
+                //MessageUtil.DoSetTBDetail($"找到{entityLst.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
+                ////找寻需要解析的文件并保存到用户指定的位置
+
+                //saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
+
+                var haoDanKeyLst = haoDanFieldNameStr.Split(new char[]{ ';'}, StringSplitOptions.RemoveEmptyEntries);
+                
+                //
+                if (2 != haoDanKeyLst.Count())
+                {
+                    var message = $"发生错误：应该有两个号单列名，请联系管理员！";
+                    MessageUtil.showMessageBoxWithErrorLog(message);
+                    return true;
+                }
+
+
+                List<Dictionary<String, String>> lstOfFieldAndValueDic = new List<Dictionary<string, string>>();
+
+                //单行
+                foreach (var haoDanLine in haoDanFieldDistinctValues)
+                {
+                    Dictionary<String, String> fieldAndValueDic = new Dictionary<string, string>();
+                    var haoDanValueLst = haoDanLine.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (2 != haoDanValueLst.Count())
+                    {
+                        var message = $"{Environment.NewLine}应该有两个号单值，用;分隔，当前值{haoDanLine}";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                        continue;
+                    }
+
+                    for (int i = 0; i < haoDanKeyLst.Count(); i++)
+                    {
+                        fieldAndValueDic.Add(haoDanKeyLst[i], haoDanValueLst[i]);
+                    }
+                    lstOfFieldAndValueDic.Add(fieldAndValueDic);
+                }
+
+                if (haoDanFieldDistinctValues.Count() != lstOfFieldAndValueDic.Count())
+                {
+                    var message = $"提供的号单有{haoDanFieldDistinctValues.Count()}行，实际解析到{lstOfFieldAndValueDic.Count()}组号单值,分别是{MiscUtil.jsonSerilizeObject(lstOfFieldAndValueDic)}";
+
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
+                //处理号单
+
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                List<S_AMERICA_TRANSFER_BRAND> entityLst = new List<S_AMERICA_TRANSFER_BRAND>();
+                var resultRecord = queryRecordsWithMultiFieldNameAndValues(dataSourceEntites, dataSourceEntites.S_AMERICA_TRANSFER_BRAND, "S_AMERICA_TRANSFER_BRAND", lstOfFieldAndValueDic);
 
-                foreach (var entityValue in haoDanFieldDistinctValues)
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.ASSIGNMENT_REEL_NO + ";" + entity.ASSIGNMENT_FRAME_NO).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+
+                if (haoDanValueWithoutRecord.Count() > 0)
                 {
-                    var haoDanValueList = entityValue.Split("\\".ToArray());
-                    if (2 == haoDanValueList.Count())
-                    {
-                        var ASSIGNMENT_REEL_NO = haoDanValueList[0];
-                        var ASSIGNMENT_FRAME_NO = haoDanValueList[1];
-                        var resultRecord = (from entity in dataSourceEntites.S_AMERICA_TRANSFER_BRAND
-                                            where ASSIGNMENT_REEL_NO == entity.ASSIGNMENT_REEL_NO && ASSIGNMENT_FRAME_NO == entity.ASSIGNMENT_FRAME_NO
-                                            select entity).FirstOrDefault();
-
-                        if (null != resultRecord)
-                        {
-                            entityLst.Add(resultRecord);
-                        }
-                    }
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
                 }
 
 
 
-
-                if (null == entityLst || 0 == entityLst.Count())
+                if (null == resultRecord || 0 == resultRecord.Count())
                 {
                     MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
                     return true;
                 }
 
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
 
-                foreach (var entity in entityLst)
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
+                foreach (var entity in resultRecord)
                 {
+                    //获取数据库内XML文件的相对路径                    
+                    var xmlFilePath = entity.PATH_XML;
 
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))//XML路径
+                    //获取压缩包相对路径
+                    var zipRelativePath = xmlFilePath.Substring(0, xmlFilePath.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4);
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedZipAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, zipRelativePath);
+
+
+                    //寻找能够读取到文件路径
+                    var zipAbsPathIEnum = from absPath in allConcatedZipAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var zipAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == zipAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PATH_XML);
+                        zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            LogHelper.WriteExportErrorLog(message1);
+                            errorMessageTopScope += message1;
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            LogHelper.WriteExportErrorLog(message1);
+                            errorMessageTopScope += message1;
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{zipAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        zipAbsPath = zipAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{zipAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{zipAbsPath}作为提取路径!");
+                    }
+
+
+                    List<String> allArchiveInnerPathOfCurrentArchive = new List<string>();
+
+
+                    if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
+                    {
+                        allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
+                    }
+
+
+                    if (0 == allArchiveInnerPathOfCurrentArchive.Count())
+                    {
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        LogHelper.WriteExportErrorLog(message);
+                        errorMessageTopScope += message;
+                        continue;
+                    }
+
+
+
+                    //打开压缩包
+                    SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                    //压缩包
+                    using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(zipAbsPath))
+                    {
+                        //依次提取文件到目录
+                        foreach (var archiveInnerPath in allArchiveInnerPathOfCurrentArchive)
+                        {
+                            var foundEntry = (from entry in archive.Entries
+                                              where
+                                              ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entry.Key)).
+                                              Equals(
+                                                  ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(archiveInnerPath))
+                                                    )
+                                              select entry).FirstOrDefault();
+
+                            if (null == foundEntry)
+                            {
+                                var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                            else //能够找到对应的条目
+                            {
+                                //写条目到目的地址
+                                var zipFileName = Path.GetFileName(zipAbsPath);
+                                retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
+
+                                //目标路径
+                                var targetSaveFullPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + zipFileName + "\\" + archiveInnerPath;
+
+                                try
+                                {
+                                    //生成目标文件的父目录
+                                    FileInfo targetFileInfo = new FileInfo(targetSaveFullPath);
+
+                                    //目标文件存在
+                                    if (targetFileInfo.Exists)
+                                    {
+                                        var message = $"目标文件{targetSaveFullPath}存在，将会覆盖该文件，当前记录信息如下：{MiscUtil.jsonSerilizeObject(entity)}";
+                                        LogHelper.WriteExportErrorLog(message);
+                                        MessageUtil.DoSetTBDetail(message);
+                                    }
+
+                                    //生成所有相关路径
+                                    Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                                    //将文件写到指定的目录
+                                    foundEntry.WriteToDirectory(targetFileInfo.Directory.FullName);
+                                    MessageUtil.DoSetTBDetail($"文件{targetFileInfo.FullName}提取成功!");
+                                }
+                                catch (Exception ex)
+                                {
+                                    var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+
+                        handledCount++;
+                        //ASSIGNMENT_REEL_NO;ASSIGNMENT_FRAME_NO
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.ASSIGNMENT_REEL_NO + ";" + entity.ASSIGNMENT_FRAME_NO);
                     }
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
-
-                MessageUtil.DoSetTBDetail($"找到{entityLst.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
-
             }
             #endregion
 
@@ -962,7 +1225,60 @@ namespace TheDataResourceExporter
             #region 162 zip
             else if ("中国法院判例初加工数据".Equals(fileType))
             {
-                haoDanFieldNameStr = "PN";
+                //haoDanFieldNameStr = "PN";
+                ////处理号单
+                //var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
+                //                                       select "'" + orginValue + "'").ToList();
+
+                //MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
+
+                //var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_COURTCASE_PROCESS, "S_CHINA_COURTCASE_PROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+                //if (null == resultRecord || 0 == resultRecord.Count())
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                //    return true;
+                //}
+
+                ////获取需要提取的文件的相对路径
+                //List<string> allRelativePaths = new List<string>();
+
+                //foreach (var entity in resultRecord)
+                //{
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                //    {
+                //        allRelativePaths.Add(entity.PATH_XML);
+                //    }
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_PDF))
+                //    {
+                //        allRelativePaths.Add(entity.PATH_PDF);
+                //    }
+
+                //}
+                ////剔除可能重复的记录
+                //allRelativePaths = allRelativePaths.Distinct().ToList();
+
+                //if (0 == allRelativePaths.Count)
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                //    return true;
+                //}
+
+                //MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
+                ////找寻需要解析的文件并保存到用户指定的位置
+
+                //saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
@@ -971,45 +1287,185 @@ namespace TheDataResourceExporter
 
                 var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_COURTCASE_PROCESS, "S_CHINA_COURTCASE_PROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.PN).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
+
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
                     MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
+                    //获取数据库内XML文件的相对路径
+                    var xmlFilePath = entity.PATH_XML;
 
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                    //获取压缩包相对路径
+                    var zipRelativePath = xmlFilePath.Substring(0, xmlFilePath.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4);
+
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedZipAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, zipRelativePath);
+
+
+                    //寻找能够读取到文件路径
+                    var zipAbsPathIEnum = from absPath in allConcatedZipAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var zipAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == zipAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PATH_XML);
+                        zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{zipAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        zipAbsPath = zipAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{zipAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{zipAbsPath}作为提取路径!");
                     }
 
-                    if (!String.IsNullOrEmpty(entity.PATH_PDF))
+
+                    List<String> allArchiveInnerPathOfCurrentArchive = new List<string>();
+
+
+                    if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
                     {
-                        allRelativePaths.Add(entity.PATH_PDF);
+                        allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
+                        if (!string.IsNullOrWhiteSpace(entity.PATH_PDF))
+                        {
+                            allArchiveInnerPathOfCurrentArchive.Add(entity.PATH_PDF.Substring(entity.PATH_PDF.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4));
+                        }
                     }
 
+
+                    if (0 == allArchiveInnerPathOfCurrentArchive.Count())
+                    {
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        continue;
+                    }
+
+
+
+                    //打开压缩包
+                    SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                    //压缩包
+                    using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(zipAbsPath))
+                    {
+                        //依次提取文件到目录
+                        foreach (var archiveInnerPath in allArchiveInnerPathOfCurrentArchive)
+                        {
+                            var foundEntry = (from entry in archive.Entries
+                                              where
+                                              ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entry.Key)).
+                                              Equals(
+                                                  ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(archiveInnerPath))
+                                                    )
+                                              select entry).FirstOrDefault();
+
+                            if (null == foundEntry)
+                            {
+                                var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                            else //能够找到对应的条目
+                            {
+                                //写条目到目的地址
+                                var zipFileName = Path.GetFileName(zipAbsPath);
+                                retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
+
+                                //目标路径
+                                var targetSaveFullPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + zipFileName + "\\" + archiveInnerPath;
+
+                                try
+                                {
+                                    //生成目标文件的父目录
+                                    FileInfo targetFileInfo = new FileInfo(targetSaveFullPath);
+
+                                    //目标文件存在
+                                    if (targetFileInfo.Exists)
+                                    {
+                                        var message = $"目标文件{targetSaveFullPath}存在，将会覆盖该文件，当前记录信息如下：{MiscUtil.jsonSerilizeObject(entity)}";
+                                        LogHelper.WriteExportErrorLog(message);
+                                        MessageUtil.DoSetTBDetail(message);
+                                    }
+
+                                    //生成所有相关路径
+                                    Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                                    //将文件写到指定的目录
+                                    foundEntry.WriteToDirectory(targetFileInfo.Directory.FullName);
+                                    MessageUtil.DoSetTBDetail($"文件{targetFileInfo.FullName}提取成功!");
+                                }
+                                catch (Exception ex)
+                                {
+                                    var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+
+                        handledCount++;
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.PN);
+                    }
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
-
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
-
-
 
 
 
@@ -1027,7 +1483,69 @@ namespace TheDataResourceExporter
             #region 172 zip
             else if ("马德里商标购买数据".Equals(fileType))
             {
-                haoDanFieldNameStr = "INTREGN";
+
+
+
+                //haoDanFieldNameStr = "INTREGN";
+                ////处理号单
+                //var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
+                //                                       select "'" + orginValue + "'").ToList();
+
+                //MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
+
+                //var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_PURCHASE, "S_MADRID_BRAND_PURCHASE", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+                //if (null == resultRecord || 0 == resultRecord.Count())
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                //    return true;
+                //}
+
+                ////获取需要提取的文件的相对路径
+                //List<string> allRelativePaths = new List<string>();
+
+                //foreach (var entity in resultRecord)
+                //{
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_PIC))//忽略为空的路径
+                //    {
+                //        allRelativePaths.Add(entity.PATH_PIC);
+                //    }
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_XML))
+                //    {
+                //        allRelativePaths.Add(entity.PATH_XML);
+                //    }
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_PIC_SF))
+                //    {
+                //        allRelativePaths.Add(entity.PATH_PIC_SF);
+                //    }
+                //}
+                ////剔除可能重复的记录
+                //allRelativePaths = allRelativePaths.Distinct().ToList();
+
+                //if (0 == allRelativePaths.Count)
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                //    return true;
+                //}
+
+                //MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
+                ////找寻需要解析的文件并保存到用户指定的位置
+
+                //saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+
+                //haoDanFieldNameStr = "MARK_CN_ID";
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
@@ -1036,47 +1554,191 @@ namespace TheDataResourceExporter
 
                 var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_MADRID_BRAND_PURCHASE, "S_MADRID_BRAND_PURCHASE", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.INTREGN).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
+
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    var message = $"没有查询到记录，请核实号单{HDPath}内容!";
+                    MessageUtil.showMessageBoxWithErrorLog(message);
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
+                    //获取数据库内XML文件的相对路径
 
-                    if (!String.IsNullOrEmpty(entity.PATH_PIC))//忽略为空的路径
+                    var xmlFilePath = entity.PATH_XML;
+
+                    //获取压缩包相对路径
+                    var zipRelativePath = xmlFilePath.Substring(0, xmlFilePath.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4);
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedZipAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, zipRelativePath);
+
+
+                    //寻找能够读取到文件路径
+                    var zipAbsPathIEnum = from absPath in allConcatedZipAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var zipAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == zipAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PATH_PIC);
+                        zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{zipAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        zipAbsPath = zipAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{zipAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{zipAbsPath}作为提取路径!");
                     }
 
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))
+
+                    List<String> allArchiveInnerPathOfCurrentArchive = new List<string>();
+                    if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
                     {
-                        allRelativePaths.Add(entity.PATH_XML);
+                        allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
+
+                        if (!string.IsNullOrWhiteSpace(entity.PATH_PIC))
+                        {
+                            allArchiveInnerPathOfCurrentArchive.Add(entity.PATH_PIC.Substring(entity.PATH_PIC.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4));
+                        }
+
+
+                        if (!string.IsNullOrWhiteSpace(entity.PATH_PIC_SF))
+                        {
+                            allArchiveInnerPathOfCurrentArchive.Add(entity.PATH_PIC_SF.Substring(entity.PATH_PIC_SF.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4));
+                        }
                     }
 
-                    if (!String.IsNullOrEmpty(entity.PATH_PIC_SF))
+
+                    if (0 == allArchiveInnerPathOfCurrentArchive.Count())
                     {
-                        allRelativePaths.Add(entity.PATH_PIC_SF);
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        continue;
+                    }
+
+
+
+                    //打开压缩包
+                    SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                    //压缩包
+                    using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(zipAbsPath))
+                    {
+                        //依次提取文件到目录
+                        foreach (var archiveInnerPath in allArchiveInnerPathOfCurrentArchive)
+                        {
+                            var foundEntry = (from entry in archive.Entries
+                                              where
+                                              ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entry.Key)).
+                                              Equals(
+                                                  ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(archiveInnerPath))
+                                                    )
+                                              select entry).FirstOrDefault();
+
+                            if (null == foundEntry)
+                            {
+                                var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                            else //能够找到对应的条目
+                            {
+                                //写条目到目的地址
+                                var zipFileName = Path.GetFileName(zipAbsPath);
+                                retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
+
+                                //目标路径
+                                var targetSaveFullPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + zipFileName + "\\" + archiveInnerPath;
+
+                                try
+                                {
+                                    //生成目标文件的父目录
+                                    FileInfo targetFileInfo = new FileInfo(targetSaveFullPath);
+
+                                    //目标文件存在
+                                    if (targetFileInfo.Exists)
+                                    {
+                                        var message = $"目标文件{targetSaveFullPath}存在，将会覆盖该文件，当前记录信息如下：{MiscUtil.jsonSerilizeObject(entity)}";
+                                        LogHelper.WriteExportErrorLog(message);
+                                        MessageUtil.DoSetTBDetail(message);
+                                    }
+
+                                    //生成所有相关路径
+                                    Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                                    //将文件写到指定的目录
+                                    foundEntry.WriteToDirectory(targetFileInfo.Directory.FullName);
+                                }
+                                catch (Exception ex)
+                                {
+                                    var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
+
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+
+                        handledCount++;
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.INTREGN);
                     }
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
 
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
 
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
 
             }
             #endregion
@@ -1085,7 +1747,54 @@ namespace TheDataResourceExporter
             #region 180 zip
             else if ("中国专利代理知识产权法律法规加工数据".Equals(fileType))
             {
-                haoDanFieldNameStr = "LAW_NO";
+                //haoDanFieldNameStr = "LAW_NO";
+                ////处理号单
+                //var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
+                //                                       select "'" + orginValue + "'").ToList();
+
+                //MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
+
+                //var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_LAWSPROCESS, "S_CHINA_PATENT_LAWSPROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+                //if (null == resultRecord || 0 == resultRecord.Count())
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                //    return true;
+                //}
+
+                ////获取需要提取的文件的相对路径
+                //List<string> allRelativePaths = new List<string>();
+
+                //foreach (var entity in resultRecord)
+                //{
+
+                //    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                //    {
+                //        allRelativePaths.Add(entity.PATH_XML);
+                //    }
+                //}
+                ////剔除可能重复的记录
+                //allRelativePaths = allRelativePaths.Distinct().ToList();
+
+                //if (0 == allRelativePaths.Count)
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                //    return true;
+                //}
+
+                //MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
+                ////找寻需要解析的文件并保存到用户指定的位置
+
+                //saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
@@ -1094,38 +1803,181 @@ namespace TheDataResourceExporter
 
                 var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_LAWSPROCESS, "S_CHINA_PATENT_LAWSPROCESS", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
 
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.LAW_NO).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
+
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    MessageUtil.showMessageBoxWithErrorLog($"没有查询到记录，请核实号单{HDPath}内容!");
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
+                    //获取数据库内XML文件的相对路径
+                    var xmlFilePath = entity.PATH_XML;
 
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                    //获取压缩包相对路径
+                    var zipRelativePath = xmlFilePath.Substring(0, xmlFilePath.IndexOf(".zip", StringComparison.CurrentCultureIgnoreCase) + 4);
+
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedZipAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, zipRelativePath);
+
+
+                    //寻找能够读取到文件路径
+                    var zipAbsPathIEnum = from absPath in allConcatedZipAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var zipAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == zipAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PATH_XML);
+                        zipAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(zipAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+                            var message1 = $"没有找到可提取zip文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            LogHelper.WriteExportErrorLog(message1);
+                            errorMessageTopScope += message1;
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(zipAbsPath))
+                        {
+                            var message1 = $"无法访问文件{zipAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedZipAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        zipAbsPath = zipAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{zipAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{zipAbsPath}作为提取路径!");
+                    }
+
+
+                    List<String> allArchiveInnerPathOfCurrentArchive = new List<string>();
+
+
+
+                    if (!string.IsNullOrWhiteSpace(entity.ARCHIVE_INNER_PATH))
+                    {
+                        allArchiveInnerPathOfCurrentArchive.Add(entity.ARCHIVE_INNER_PATH);
+                    }
+
+
+
+                    if (0 == allArchiveInnerPathOfCurrentArchive.Count())
+                    {
+                        var message = $"发生错误：没有找到要提取的包内压缩包路径 {Environment.NewLine}您提供的信息:{contextInfo}。";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        continue;
+                    }
+
+                    //打开压缩包
+                    SharpCompress.Common.ArchiveEncoding.Default = System.Text.Encoding.Default;
+
+                    //压缩包
+                    using (IArchive archive = SharpCompress.Archive.ArchiveFactory.Open(zipAbsPath))
+                    {
+                        //依次提取文件到目录
+                        foreach (var archiveInnerPath in allArchiveInnerPathOfCurrentArchive)
+                        {
+                            var foundEntry = (from entry in archive.Entries
+                                              where
+                                              ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entry.Key)).
+                                              Equals(
+                                                  ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(archiveInnerPath))
+                                                    )
+                                              select entry).FirstOrDefault();
+
+                            if (null == foundEntry)
+                            {
+                                var message = $"发生错误：在压缩包{zipAbsPath}内没有找到{archiveInnerPath}条目!{Environment.NewLine}当前记录信息{MiscUtil.jsonSerilizeObject(entity)}!";
+
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                            else //能够找到对应的条目
+                            {
+                                //写条目到目的地址
+                                var zipFileName = Path.GetFileName(zipAbsPath);
+                                retrievedFileSavePath = ensureNotEndWithBackSlash(retrievedFileSavePath);
+
+                                //目标路径
+                                var targetSaveFullPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + zipFileName + "\\" + archiveInnerPath;
+
+                                try
+                                {
+                                    //生成目标文件的父目录
+                                    FileInfo targetFileInfo = new FileInfo(targetSaveFullPath);
+
+                                    //目标文件存在
+                                    if (targetFileInfo.Exists)
+                                    {
+                                        var message = $"目标文件{targetSaveFullPath}存在，将会覆盖该文件，当前记录信息如下：{MiscUtil.jsonSerilizeObject(entity)}";
+                                        LogHelper.WriteExportErrorLog(message);
+                                        MessageUtil.DoSetTBDetail(message);
+                                    }
+
+                                    //生成所有相关路径
+                                    Directory.CreateDirectory(targetFileInfo.Directory.FullName);
+                                    //将文件写到指定的目录
+                                    foundEntry.WriteToDirectory(targetFileInfo.Directory.FullName);
+                                }
+                                catch (Exception ex)
+                                {
+                                    var message = $"提取文件{zipAbsPath}/{archiveInnerPath}失败，保存路径{targetSaveFullPath},{Environment.NewLine}错误消息{ex.Message}, {Environment.NewLine}错误详情{ex.StackTrace}";
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+
+                        handledCount++;
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.LAW_NO);
                     }
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
-
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
-
             }
             #endregion
 
@@ -1147,149 +1999,561 @@ namespace TheDataResourceExporter
 
 
             #region 194 特殊处理 非ZIP  多个记录值
-            else if ("中国专利复审（无效）数据".Equals(fileType))
+            else if ("中国专利复审数据".Equals(fileType))
             {
-                haoDanFieldNameStr = "APPLICATION_NUMBER";
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_REVIEW, "S_CHINA_PATENT_REVIEW", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot, true);
+
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_REVIEW, "S_CHINA_PATENT_REVIEW", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.APPLICATION_NUMBER).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    MessageUtil.showMessageBoxWithErrorLog($"没有查询到记录，请核实号单{HDPath}内容!");
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                    //获取数据库内XML文件的相对路径
+                    var xmlFilePath = entity.PATH_XML;
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedXMLAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, xmlFilePath);
+
+
+                    //寻找能够读取到文件路径
+                    var xmlAbsPathIEnum = from absPath in allConcatedXMLAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var xmlAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == xmlAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(CompressUtil.ensureUseBackSlash(entity.PATH_XML));
+                        xmlAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(xmlAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取XML文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(xmlAbsPath))
+                        {
+                            var message1 = $"无法访问文件{xmlAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{xmlAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedXMLAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
                     }
+                    else
+                    {
+                        xmlAbsPath = xmlAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{xmlAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{xmlAbsPath}作为提取路径!");
+                    }
+
+                    //XML文件是否存在
+                    if (!File.Exists(xmlAbsPath))
+                    {
+                        var message = $"没有找到文件{xmlAbsPath}, 提取失败";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else //对文件进行提取
+                    {
+                        //使用反斜杠 作为文件分隔符
+                        xmlAbsPath = CompressUtil.ensureUseBackSlash(xmlAbsPath);
+                        var xmlRelativePath = ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entity.PATH_XML));
+
+                        var docAbsPath = xmlAbsPath.Replace("复审XML", "复审DOC");
+                        docAbsPath = docAbsPath.Substring(0, docAbsPath.Length - 4) + ".doc";
+
+                        var docRelativePath = xmlRelativePath.Replace("复审XML", "复审DOC");
+                        docRelativePath = docRelativePath.Substring(0, docRelativePath.Length - 4) + ".doc";
+
+                        //目标路径
+                        var targetXMLPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + xmlRelativePath;
+
+
+                        try
+                        {
+                            FileInfo targetXMLFileInfo = new FileInfo(targetXMLPath);
+                            Directory.CreateDirectory(targetXMLFileInfo.Directory.FullName);
+                            File.Copy(xmlAbsPath, targetXMLPath, true);//复制文件
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                            errorMessageTopScope += message;
+                            MessageUtil.DoSetTBDetail(message);
+                            LogHelper.WriteExportErrorLog(message);
+                        }
+
+                        if (File.Exists(docAbsPath))//目标Doc存在
+                        {
+                            var targetDocPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + docRelativePath;
+                            FileInfo targetDocFileInfo = new FileInfo(targetDocPath);
+                            try
+                            {
+                                Directory.CreateDirectory(targetDocFileInfo.Directory.FullName);
+                                File.Copy(docAbsPath, targetDocPath, true);//复制文件
+                            }
+                            catch (Exception ex)
+                            {
+                                var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                        }
+                    }
+
+                        handledCount++;
+                        MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.APPLICATION_NUMBER);
                 }
+            }
+            #endregion
 
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
+            #region 195 特殊处理 非ZIP  多个记录值
+            else if ("中国专利无效数据".Equals(fileType))
+            {
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
                     return true;
                 }
 
-                //根据查找到的XML相对路径，查找对应的原文 相对路径
+                //处理号单
+                var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
+                                                       select "'" + orginValue + "'").ToList();
 
-                List<String> allDocFilesRelativeFiles = new List<string>();
+                MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                MessageUtil.DoSetTBDetail("正在根据XML路径查找原文(*.doc)文件");
-                foreach (var xmlRelativePath in allDocFilesRelativeFiles)
+
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_INVALID, "S_CHINA_PATENT_INVALID", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.APPLICATION_NUMBER).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
                 {
-                    var filePathParts = xmlRelativePath.Split("\\".ToArray());
-                    var xmlFileName = filePathParts.LastOrDefault();
-                    var docFileName = xmlFileName.Substring(0, xmlFileName.Length - "xml".Length) + "doc";
-                    var parentRelativePath = String.Join("\\", filePathParts.Take(filePathParts.Count() - 1));
-                    var DocParentRelativePath = parentRelativePath.Replace("XML", "原文");
-                    var DocRelativePath = DocParentRelativePath + "\\" + docFileName;
-
-                    allDocFilesRelativeFiles.Add(DocRelativePath);
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
                 }
 
-                allRelativePaths.AddRange(allDocFilesRelativeFiles.Distinct());
 
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件。");
 
-                //找寻需要解析的文件并保存到用户指定的位置
-                saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+                if (null == resultRecord || 0 == resultRecord.Count())
+                {
+                    MessageUtil.showMessageBoxWithErrorLog($"没有查询到记录，请核实号单{HDPath}内容!");
+                    return true;
+                }
+
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
+
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
+                foreach (var entity in resultRecord)
+                {
+                    //获取数据库内XML文件的相对路径
+                    var xmlFilePath = entity.PATH_XML;
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedXMLAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, xmlFilePath);
+
+
+                    //寻找能够读取到文件路径
+                    var xmlAbsPathIEnum = from absPath in allConcatedXMLAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var xmlAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == xmlAbsPathIEnum.Count())
+                    {
+                        xmlAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(xmlAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取XML文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            LogHelper.WriteExportErrorLog(message1);
+                            errorMessageTopScope += message1;
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(xmlAbsPath))
+                        {
+                            var message1 = $"无法访问文件{xmlAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            LogHelper.WriteExportErrorLog(message1);
+                            errorMessageTopScope += message1;
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{xmlAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedXMLAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        xmlAbsPath = xmlAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{xmlAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{xmlAbsPath}作为提取路径!");
+                    }
+
+                    //XML文件是否存在
+                    if (!File.Exists(xmlAbsPath))
+                    {
+                        var message = $"没有找到文件{xmlAbsPath}, 提取失败";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else //对文件进行提取
+                    {
+                        //使用反斜杠 作为文件分隔符
+                        xmlAbsPath = CompressUtil.ensureUseBackSlash(xmlAbsPath);
+                        var xmlRelativePath = ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entity.PATH_XML));
+
+                        var docAbsPath = xmlAbsPath.Replace("无效XML", "无效DOC");
+                        docAbsPath = docAbsPath.Substring(0, docAbsPath.Length - 4) + ".doc";
+
+                        var docRelativePath = xmlRelativePath.Replace("无效XML", "无效DOC");
+                        docRelativePath = docRelativePath.Substring(0, docRelativePath.Length - 4) + ".doc";
+
+                        //目标路径
+                        var targetXMLPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + xmlRelativePath;
+
+
+                        try
+                        {
+                            FileInfo targetXMLFileInfo = new FileInfo(targetXMLPath);
+                            Directory.CreateDirectory(targetXMLFileInfo.Directory.FullName);
+                            File.Copy(xmlAbsPath, targetXMLPath, true);//复制文件
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                            errorMessageTopScope += message;
+                            MessageUtil.DoSetTBDetail(message);
+                            LogHelper.WriteExportErrorLog(message);
+                        }
+
+                        if (File.Exists(docAbsPath))//目标Doc存在
+                        {
+                            var targetDocPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + docRelativePath;
+                            FileInfo targetDocFileInfo = new FileInfo(targetDocPath);
+                            try
+                            {
+                                Directory.CreateDirectory(targetDocFileInfo.Directory.FullName);
+                                File.Copy(docAbsPath, targetDocPath, true);//复制文件
+                            }
+                            catch (Exception ex)
+                            {
+                                var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                        }
+                    }
+
+                    handledCount++;
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.APPLICATION_NUMBER);
+                }
+
+
+
+
             }
             #endregion
 
 
-            #region 196 特殊处理 非Zip 多条记录
+
+            #region 196 特殊处理 非ZIP  多个记录值
             else if ("中国专利的判决书数据".Equals(fileType))
             {
-                haoDanFieldNameStr = "PATENT_APPLICATION_NUMBER";
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
-                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_JUDGMENT, "S_CHINA_PATENT_JUDGMENT", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot, true);
+
+                var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_CHINA_PATENT_JUDGMENT, "S_CHINA_PATENT_JUDGMENT", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.PATENT_APPLICATION_NUMBER).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
-                    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                    MessageUtil.showMessageBoxWithErrorLog($"没有查询到记录，请核实号单{HDPath}内容!");
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
-                    if (!String.IsNullOrEmpty(entity.PATH_XML))//忽略为空的路径
+                    //获取数据库内XML文件的相对路径
+                    var xmlFilePath = entity.PATH_XML;
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedXMLAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, xmlFilePath);
+
+
+                    //寻找能够读取到文件路径
+                    var xmlAbsPathIEnum = from absPath in allConcatedXMLAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+                    var xmlAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == xmlAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(CompressUtil.ensureUseBackSlash(entity.PATH_XML));
+                        xmlAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(xmlAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取XML文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(xmlAbsPath))
+                        {
+                            var message1 = $"无法访问文件{xmlAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{xmlAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedXMLAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
                     }
+                    else
+                    {
+                        xmlAbsPath = xmlAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{xmlAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{xmlAbsPath}作为提取路径!");
+                    }
+
+                    //XML文件是否存在
+                    if (!File.Exists(xmlAbsPath))
+                    {
+                        var message = $"没有找到文件{xmlAbsPath}, 提取失败";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else //对文件进行提取
+                    {
+                        //使用反斜杠 作为文件分隔符
+                        xmlAbsPath = CompressUtil.ensureUseBackSlash(xmlAbsPath);
+                        var xmlRelativePath = ensureNotStartWithBackSlash(CompressUtil.ensureUseBackSlash(entity.PATH_XML));
+
+                        var docAbsPath = xmlAbsPath.Replace("XML", "DOC");
+                        var docRelativePath = xmlRelativePath.Replace("XML", "DOC");
+
+                        if (xmlAbsPath.Contains("判决书(更新)"))
+                        {
+                            docAbsPath = xmlAbsPath.Replace("XML", "原文");
+                            docRelativePath = xmlRelativePath.Replace("XML", "原文");
+                        }
+
+                        docAbsPath = docAbsPath.Substring(0, docAbsPath.Length - 4) + ".doc";
+
+                        docRelativePath = docRelativePath.Substring(0, docRelativePath.Length - 4) + ".doc";
+
+                        //目标路径
+                        var targetXMLPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + xmlRelativePath;
+
+
+                        try
+                        {
+                            FileInfo targetXMLFileInfo = new FileInfo(targetXMLPath);
+                            Directory.CreateDirectory(targetXMLFileInfo.Directory.FullName);
+                            File.Copy(xmlAbsPath, targetXMLPath, true);//复制文件
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                            errorMessageTopScope += message;
+                            MessageUtil.DoSetTBDetail(message);
+                            LogHelper.WriteExportErrorLog(message);
+                        }
+
+                        if (File.Exists(docAbsPath))//目标Doc存在
+                        {
+                            var targetDocPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + docRelativePath;
+                            FileInfo targetDocFileInfo = new FileInfo(targetDocPath);
+                            try
+                            {
+                                Directory.CreateDirectory(targetDocFileInfo.Directory.FullName);
+                                File.Copy(docAbsPath, targetDocPath, true);//复制文件
+                            }
+                            catch (Exception ex)
+                            {
+                                var message = $"文件{xmlAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                                errorMessageTopScope += message;
+                                MessageUtil.DoSetTBDetail(message);
+                                LogHelper.WriteExportErrorLog(message);
+                            }
+                        }
+                    }
+
+                    handledCount++;
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.PATENT_APPLICATION_NUMBER);
                 }
 
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
 
 
-                //根据查找到的XML相对路径，查找对应的原文 相对路径
-                List<String> allDocFilesRelativeFiles = new List<string>();
-
-                MessageUtil.DoSetTBDetail("正在根据XML路径查找原文(*.doc)文件");
-                foreach (var xmlRelativePath in allDocFilesRelativeFiles)
-                {
-                    var filePathParts = xmlRelativePath.Split("\\".ToArray());
-                    var xmlFileName = filePathParts.LastOrDefault();
-                    var docFileName = xmlFileName.Substring(0, xmlFileName.Length - "xml".Length) + "doc";
-                    var parentRelativePath = String.Join("\\", filePathParts.Take(filePathParts.Count() - 1));
-                    var DocParentRelativePath = parentRelativePath.Replace("XML", "原文");
-                    var DocRelativePath = DocParentRelativePath + "\\" + docFileName;
-
-                    allDocFilesRelativeFiles.Add(DocRelativePath);
-                }
-
-                allRelativePaths.AddRange(allDocFilesRelativeFiles.Distinct());
-
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件。");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesInArchive(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
 
             }
             #endregion
+
+
 
 
             #region 209.1 非zip
             else if ("中国生物序列深加工数据-中文".Equals(fileType))
             {
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
 
-                haoDanFieldNameStr = "CURRENT_APPLICATION_NUMBER";
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
+
                 var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_CN, "S_T_BIOLOGICAL_CN", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.CURRENT_APPLICATION_NUMBER).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -1297,50 +2561,211 @@ namespace TheDataResourceExporter
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
+                    var allRelativePath = new List<String>();
+                    //获取数据库内文本和prj文件的相对路径
 
-                    if (!String.IsNullOrEmpty(entity.PROJECT_PATH))//忽略为空的路径
+                    var txtRelativeFilePath = entity.SEQUENCE_FILE_PATH;
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedXMLAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, txtRelativeFilePath);
+
+
+                    //寻找能够读取到文件路径
+                    var textAbsPathIEnum = from absPath in allConcatedXMLAbsPaths
+                                          where File.Exists(absPath)
+                                          select absPath;
+
+
+
+                    var txtAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == textAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PROJECT_PATH);
+                        txtAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(txtAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取序列文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(txtAbsPath))
+                        {
+                            var message1 = $"无法访问文件{txtAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{txtAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedXMLAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        txtAbsPath = textAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{textAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{txtAbsPath}作为提取路径!");
                     }
 
-                    if (!String.IsNullOrEmpty(entity.SEQUENCE_FILE_PATH))//忽略为空的路径
+                    //txt文件是否存在
+                    if (!File.Exists(txtAbsPath))
                     {
-                        allRelativePaths.Add(entity.SEQUENCE_FILE_PATH);
+                        var message = $"没有找到文件{txtAbsPath}, 提取失败";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
                     }
+                    else //对文件进行提取
+                    {
+                        //使用反斜杠 作为文件分隔符
+                        txtAbsPath = CompressUtil.ensureUseBackSlash(txtAbsPath);
+
+                        //目标路径
+                        var targetTXTPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + txtRelativeFilePath;
+
+                        var prjRelativeFilePath = entity.PROJECT_PATH;
+                        var prjFileName = Path.GetFileName(prjRelativeFilePath);
+
+                        var prjAbsPath = new FileInfo(txtAbsPath).DirectoryName + "\\" + prjFileName;
+                        var targetPrjPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + prjRelativeFilePath;
+
+                        try
+                        {
+                            FileInfo targetXMLFileInfo = new FileInfo(targetTXTPath);
+                            Directory.CreateDirectory(targetXMLFileInfo.Directory.FullName);
+                            File.Copy(txtAbsPath, targetTXTPath, true);//复制文件
+
+                            if (!String.IsNullOrWhiteSpace(prjRelativeFilePath))
+                            {
+                                if (File.Exists(prjAbsPath))
+                                {
+                                    File.Copy(prjAbsPath, targetPrjPath, true);
+                                }
+                                else
+                                {
+                                    var message = $"文件{prjAbsPath}提取失败: 失败原因:文件不存在。当前记录信息{MiscUtil.jsonSerilizeObject(entity)}";
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"文件{txtAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                            errorMessageTopScope += message;
+                            MessageUtil.DoSetTBDetail(message);
+                            LogHelper.WriteExportErrorLog(message);
+                        }
+                    }
+
+                    handledCount++;
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.CURRENT_APPLICATION_NUMBER);
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
-
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
-
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
-
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
             }
             #endregion
+
 
             #region 209.2 非zip
             else if ("中国生物序列深加工数据-翻译".Equals(fileType))
             {
-                haoDanFieldNameStr = "CURRENT_APPLICATION_NUMBER";
+                //haoDanFieldNameStr = "CURRENT_APPLICATION_NUMBER";
+                ////处理号单
+                //var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
+                //                                       select "'" + orginValue + "'").ToList();
+
+                //MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
+
+                //var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_FY, "S_T_BIOLOGICAL_FY", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+                //if (null == resultRecord || 0 == resultRecord.Count())
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有查询到记录，请核实号单内容!");
+                //    return true;
+                //}
+
+                ////获取需要提取的文件的相对路径
+                //List<string> allRelativePaths = new List<string>();
+
+                //foreach (var entity in resultRecord)
+                //{
+                //    if (!String.IsNullOrEmpty(entity.PROJECT_PATH))//忽略为空的路径
+                //    {
+                //        allRelativePaths.Add(entity.PROJECT_PATH);
+                //    }
+
+                //    if (!String.IsNullOrEmpty(entity.SEQUENCE_FILE_PATH))//忽略为空的路径
+                //    {
+                //        allRelativePaths.Add(entity.SEQUENCE_FILE_PATH);
+                //    }
+                //}
+                ////剔除可能重复的记录
+                //allRelativePaths = allRelativePaths.Distinct().ToList();
+
+                //if (0 == allRelativePaths.Count)
+                //{
+                //    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
+                //    return true;
+                //}
+
+                //MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
+
+                ////找寻需要解析的文件并保存到用户指定的位置
+
+                //saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+
+                if (string.IsNullOrWhiteSpace(haoDanFieldNameStr))
+                {
+                    MessageUtil.showMessageBoxWithErrorLog("没有找到号单字段信息，请联系管理员处理！");
+                    return true;
+                }
+
                 //处理号单
                 var HaoDanFieldValuesWithSingleQuot = (from orginValue in haoDanFieldDistinctValues
                                                        select "'" + orginValue + "'").ToList();
 
                 MessageUtil.DoSetTBDetail("正在查询符合条件的记录，请稍候……");
 
+
                 var resultRecord = queryRecords(dataSourceEntites, dataSourceEntites.S_T_BIOLOGICAL_FY, "S_T_BIOLOGICAL_FY", haoDanFieldNameStr, HaoDanFieldValuesWithSingleQuot);
+
+
+                //获取的结果集中的 号单集
+                var haoDanCollectionOfResult = (from entity in resultRecord
+                                                select entity.CURRENT_APPLICATION_NUMBER).Distinct();
+
+                //没有查询到记录的 号单值
+                var haoDanValueWithoutRecord = haoDanFieldDistinctValues.Except(haoDanCollectionOfResult);
+                if (haoDanValueWithoutRecord.Count() > 0)
+                {
+                    var message = $"下述号单没有查询到记录，请确认这些号单是否正确：{Environment.NewLine}{String.Join(";", haoDanValueWithoutRecord)}";
+                    errorMessageTopScope += message;
+                    MessageUtil.DoSetTBDetail(message);
+                    LogHelper.WriteExportErrorLog(message);
+                }
+
+
 
                 if (null == resultRecord || 0 == resultRecord.Count())
                 {
@@ -1348,35 +2773,137 @@ namespace TheDataResourceExporter
                     return true;
                 }
 
-                //获取需要提取的文件的相对路径
-                List<string> allRelativePaths = new List<string>();
+                MessageUtil.DoSetTBDetail($"根据您提供的号单，查询到了{resultRecord.Count}条相关记录!");
 
+
+                //寻找文件逻辑:
+                //1. 寻找XML文件: 先根据库里的相对位置 和 提供的存储位置, 寻找有效的绝对路径, 寻找失败, 尝试使用库里保存的绝对路径。 上述尝试全部失败， 进行报错。
+                //2. 如果找到了XML文件后, 根据XML绝对位置, 找对应的JPG, JPG_SF文件
+
+                int totalCount = resultRecord.Count();
+                int handledCount = 0;
+
+                MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, "");
+                //遍历处理记录
                 foreach (var entity in resultRecord)
                 {
-                    if (!String.IsNullOrEmpty(entity.PROJECT_PATH))//忽略为空的路径
+
+
+                    var allRelativePath = new List<String>();
+                    //获取数据库内文本和prj文件的相对路径
+
+                    var txtRelativeFilePath = entity.SEQUENCE_FILE_PATH;
+
+
+
+                    //没有考虑 相对路径正好是 绝对路径的情况
+                    //不考虑原因: 如果拼接后寻找文件失败, 直接通过File_Path字段进行寻找。依然可以找到该文件。因此不用单独处理
+
+                    //存在的路径
+                    var allConcatedXMLAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, txtRelativeFilePath);
+
+
+                    //寻找能够读取到文件路径
+                    var textAbsPathIEnum = from absPath in allConcatedXMLAbsPaths
+                                           where File.Exists(absPath)
+                                           select absPath;
+
+
+
+
+
+                    var txtAbsPath = "";
+                    //没有找到有效的绝对路径 尝试使用
+                    if (0 == textAbsPathIEnum.Count())
                     {
-                        allRelativePaths.Add(entity.PROJECT_PATH);
+                        txtAbsPath = entity.FILE_PATH; // 使用入库时的压缩包 绝对路径当做绝对路径
+                        if (String.IsNullOrWhiteSpace(txtAbsPath))//获取路径失败, 或者压缩包文件不存在
+                        {
+
+                            var message1 = $"没有找到可提取序列文件路径，提取失败。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+                        else if (!File.Exists(txtAbsPath))
+                        {
+                            var message1 = $"无法访问文件{txtAbsPath}，请检查是否有足够权限或者路径是否正确。{Environment.NewLine}您提供的信息如下：{Environment.NewLine} {contextInfo}{Environment.NewLine}当前记录信息：{MiscUtil.jsonSerilizeObject(entity)}!";
+                            errorMessageTopScope += message1;
+                            LogHelper.WriteExportErrorLog(message1);
+                            continue; //继续处理下一条记录
+                        }
+
+                        var message = $"将使用数据库保存路径{txtAbsPath}尝试提取： {Environment.NewLine}根据您提供的信息生成了如下绝对路径{String.Join(",", allConcatedXMLAbsPaths)},{Environment.NewLine}没有获取到的有效的文档绝对路径";
+
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else
+                    {
+                        txtAbsPath = textAbsPathIEnum.FirstOrDefault(); //使用获取到第一个绝对路径
+                        MessageUtil.DoSetTBDetail($"找到了{textAbsPathIEnum.Count()}个可用压缩包绝对路径，使用第一个路径{txtAbsPath}作为提取路径!");
                     }
 
-                    if (!String.IsNullOrEmpty(entity.SEQUENCE_FILE_PATH))//忽略为空的路径
+                    //txt文件是否存在
+                    if (!File.Exists(txtAbsPath))
                     {
-                        allRelativePaths.Add(entity.SEQUENCE_FILE_PATH);
+                        var message = $"没有找到文件{txtAbsPath}, 提取失败";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
                     }
+                    else //对文件进行提取
+                    {
+                        //使用反斜杠 作为文件分隔符
+                        txtAbsPath = CompressUtil.ensureUseBackSlash(txtAbsPath);
+
+                        //目标路径
+                        var targetTXTPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + txtRelativeFilePath;
+
+                        var txtFileName = Path.GetFileName(txtRelativeFilePath);
+                        var prjRelativeFilePath = entity.PROJECT_PATH;
+                        var prjFileName = Path.GetFileName(prjRelativeFilePath);
+
+                        var prjAbsPath = new FileInfo(txtAbsPath).DirectoryName + "\\" + prjFileName;
+                        var targetPrjPath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(retrievedFileSavePath)) + "\\" + prjRelativeFilePath;
+
+                        try
+                        {
+                            FileInfo targetXMLFileInfo = new FileInfo(targetTXTPath);
+                            Directory.CreateDirectory(targetXMLFileInfo.Directory.FullName);
+                            File.Copy(txtAbsPath, targetTXTPath, true);//复制文件
+
+                            if (!String.IsNullOrWhiteSpace(prjRelativeFilePath))
+                            {
+                                if (File.Exists(prjAbsPath))
+                                {
+                                    File.Copy(prjAbsPath, targetPrjPath, true);
+                                }
+                                else
+                                {
+                                    var message = $"文件{prjAbsPath}提取失败: 失败原因:文件不存在。当前记录信息{MiscUtil.jsonSerilizeObject(entity)}";
+                                    errorMessageTopScope += message;
+                                    MessageUtil.DoSetTBDetail(message);
+                                    LogHelper.WriteExportErrorLog(message);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"文件{txtAbsPath}提取失败!失败原因:{ex.Message}, 错误详情{ex.StackTrace}。";
+                            errorMessageTopScope += message;
+                            MessageUtil.DoSetTBDetail(message);
+                            LogHelper.WriteExportErrorLog(message);
+                        }
+                    }
+
+                    handledCount++;
+                    MessageUtil.DoupdateProgressIndicator(totalCount, handledCount, 0, 0, entity.CURRENT_APPLICATION_NUMBER);
                 }
-                //剔除可能重复的记录
-                allRelativePaths = allRelativePaths.Distinct().ToList();
 
-                if (0 == allRelativePaths.Count)
-                {
-                    MessageUtil.showMessageBoxWithErrorLog("没有解析到需要提取的路径");
-                    return true;
-                }
 
-                MessageUtil.DoSetTBDetail($"找到{resultRecord.Count}条符合条件的记录，发现{allRelativePaths.Count}个需要提取的文件!");
 
-                //找寻需要解析的文件并保存到用户指定的位置
-
-                saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
             }
             #endregion
 
@@ -1394,12 +2921,122 @@ namespace TheDataResourceExporter
                 List<string> allRelativePaths = (from ap in haoDanFieldDistinctValues
                                                  select $"t_abImage(摘要附图)\\{ap}.gif").ToList();
 
-                saveRetrivedFilesDirectly(storagePaths.ToList(), retrievedFileSavePath, allRelativePaths, HDPath);
+
+
+                foreach (var abImageRelativePath in allRelativePaths)
+                {
+
+                    var allConcatedAbImageAbsPaths = from storagePath in storagePaths
+                                                 select getProperAbsPath(storagePath, abImageRelativePath);
+
+                    var abImageAbsPathIEnum = from absPath in allConcatedAbImageAbsPaths
+                                           where File.Exists(absPath)
+                                           select absPath;
+
+                    if (0 == abImageAbsPathIEnum.Count())
+                    {
+                        var message = $"{Environment.NewLine}{abImageRelativePath}提取失败!{Environment.NewLine}路径{Environment.NewLine}{String.Join(Environment.NewLine, allConcatedAbImageAbsPaths)}{Environment.NewLine}不存在";
+                        errorMessageTopScope += message;
+                        LogHelper.WriteExportErrorLog(message);
+                        MessageUtil.DoSetTBDetail(message);
+                    }
+                    else//copy文件到目标路径
+                    {
+                        var abImageAbsFilePath = abImageAbsPathIEnum.FirstOrDefault();
+                        var targetSavePath = ensureNotEndWithBackSlash(CompressUtil.ensureUseBackSlash(abImageRelativePath)) + "\\" + abImageRelativePath;
+                        FileInfo fInfo = new FileInfo(targetSavePath);
+
+                        try
+                        {
+                            Directory.CreateDirectory(fInfo.Directory.FullName);
+                            File.Copy(abImageAbsFilePath, targetSavePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            var message = $"{abImageRelativePath}提取失败!发生错误{ex.Message},错误详情{ex.StackTrace}";
+                            errorMessageTopScope += message;
+                            LogHelper.WriteExportErrorLog(message);
+                            MessageUtil.DoSetTBDetail(message);
+                        }
+                    }
+                }
             }
             #endregion
 
             return true;
         }
+
+
+
+
+
+
+
+
+
+        private static List<TEntity> queryRecordsWithMultiFieldNameAndValues<TEntity>(DataSourceEntities entiesContext, DbSet<TEntity> dbSet, string tableName, List<Dictionary<String, String>> haoDanNameAndValuesList, bool multiRecs = true) where TEntity : class
+        {
+            List<TEntity> result = new List<TEntity>();
+            foreach (var haoDanFieldNameAndValueMap in haoDanNameAndValuesList)
+            {
+                string whereStr = $"";
+                foreach (var dicKey in haoDanFieldNameAndValueMap.Keys)
+                {
+                    var fileFieldValue = "";
+                    if (haoDanFieldNameAndValueMap.TryGetValue(dicKey,out fileFieldValue))
+                    {
+                        if (!String.IsNullOrWhiteSpace(whereStr))
+                        {
+                            whereStr += $" and {dicKey}='{fileFieldValue}'";
+                        }
+                        else
+                        {
+                            whereStr += $" {dicKey}='{fileFieldValue}'";
+                        }
+                    }
+                }
+
+                //号单值出错
+                if (String.IsNullOrWhiteSpace(whereStr))
+                {
+                    continue;
+                }
+                else
+                {
+                    whereStr = "where " + whereStr;
+                }
+
+
+                //查询字段值
+                string esqlQuery = $"select * from {tableName} {whereStr}";
+
+                if (!multiRecs)//查询记录唯一
+                {
+                    var targetEntity = dbSet.SqlQuery(esqlQuery).AsNoTracking().ToList().FirstOrDefault();
+                    if (null != targetEntity)
+                    {
+                        result.Add(targetEntity);
+                    }
+                }
+                else //查询结果记录可能有多条
+                {
+                    var targetEntityEnum = dbSet.SqlQuery(esqlQuery).AsNoTracking().ToList();
+                    if (null != targetEntityEnum)
+                    {
+                        result.AddRange(targetEntityEnum);
+                    }
+                }
+            }
+            return result;
+        }
+
+
+
+
+
+
+
+
 
         /// <summary>
         /// 根据号单文件查询数据库中对应记录
@@ -1895,7 +3532,7 @@ namespace TheDataResourceExporter
         /// </summary>
         /// <param name="fileHaoDanPath"></param>
         /// <returns></returns>
-        private static Tuple<List<String>, int> parseHaoDanFile(string fileHaoDanPath)
+        private static Tuple<List<String>, int> parseHaoDanFileDistinctValuesAndLineCount(string fileHaoDanPath)
         {
             try
             {
